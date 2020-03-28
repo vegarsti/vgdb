@@ -21,3 +21,8 @@ Should use Python, since that's the language I'm most familiar with.
 - [ ] **Query Engine:** Query execution engine. Optimize.
 
 - [ ] **Query Language:** SQL? Parse it?
+
+
+## Thoughts
+
+Can the REPL be a function `f: DB -> DB`, in the spirit of Functional Core, Imperative Shell, à la Gary Bernhardt?
