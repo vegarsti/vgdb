@@ -1,26 +1,20 @@
 # toydb
 
-A database, written as a learning project.
+An RDBMS, written as a learning project.
 Inspired/stolen by [Erik Grinaker's toydb](https://github.com/erikgrinaker/toydb).
-Don't know which language I should use yet.
-Alternatives 
-
-- Python
-- Go
-- Java
-- Scala
+Should use Python, since that's the language I'm most familiar with.
 
 ## Project Outline
 
-- [ ] **Networking:** Some way to communicate between db and client.
+- [ ] **Networking:** Some way to communicate between db and client. Could be "networking", i.e. using a file
 
 - [ ] **Client:** Some REPL.
 
-- [ ] **Storage:** Some storage. Key value store?
+- [ ] **Storage:** Some storage scheme. Key value store?
 
 - [ ] **Data Types:** Some data types.
 
-- [ ] **Schemas:** Compulsory singluar primary keys, unique and foreign key constraints, indexes.
+- [ ] **Schemas:** Compulsory singular primary keys, unique and foreign key constraints, indexes.
 
 - [ ] **Transactions:** ?
 
