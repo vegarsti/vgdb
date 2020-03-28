@@ -8,7 +8,7 @@ Should use Python, since that's the language I'm most familiar with.
 
 - [ ] **Networking:** Some way to communicate between db and client. Could be "networking", i.e. using a file
 
-- [ ] **Client:** Some REPL.
+- [x] **Client:** Some REPL.
 
 - [ ] **Storage:** Some storage scheme. Key value store?
 
@@ -26,3 +26,5 @@ Should use Python, since that's the language I'm most familiar with.
 ## Thoughts
 
 Can the REPL be a function `f: DB -> DB`, in the spirit of Functional Core, Imperative Shell, à la Gary Bernhardt?
+
+Basic REPL in place.
