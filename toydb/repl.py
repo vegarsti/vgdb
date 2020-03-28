@@ -1,9 +1,9 @@
 import sys
 from contextlib import contextmanager
-from typing import Iterator, Optional
+from typing import Iterator, Optional, Tuple
 
+from toydb.command import Command
 from toydb.database import Database
-from toydb.record import Record
 
 
 @contextmanager
@@ -14,33 +14,38 @@ def repl() -> Iterator[None]:
         sys.exit()
 
 
-def parse_command(command: str) -> Optional[int]:
-    if not command.startswith("i"):
+def parse_command(command: str) -> Optional[Tuple[Command, int]]:
+    if command == "q" or command == "exit" or command == "quit":
+        return Command.EXIT, 0
+    if not command.startswith(Command.INSERT.value) and not command.startswith(Command.SELECT.value):
         return None
     args = command.split()
     if len(args) != 2:
         return None
-    value = args[1]
+    c, v = args
     try:
-        value_ = int(value)
+        value = int(v)
     except ValueError:
         return None
-    return value_
+    return Command(c), value
 
 
 with repl():
     db = Database()
     while True:
         i = input("> ")
-        should_exit = i == "q" or i == "exit" or i == "quit"
-        if should_exit:
-            break
-        value = parse_command(i.lower())
-        if value is None:
+        i_ = i.lower()
+        result = parse_command(i_)
+        if result is None:
             print(f"invalid command: {i}")
             continue
-        else:
-            print(value)
-        r = Record(value=value)
-        db = Database(db.records + [r])
+        command, value = result
+        if command is Command.EXIT:
+            break
+        if command is Command.INSERT:
+            db.insert(value)
+            print(f"{i} OK")
+        elif command is Command.SELECT:
+            print(f"{i} {db.exists(value)}")
+    print()
     print(f"Inserted records: {db}")
