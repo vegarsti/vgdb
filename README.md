@@ -8,9 +8,11 @@ Should use Python, since that's the language I'm most familiar with.
 
 - [ ] **Networking:** Some way to communicate between db and client. Could be "networking", i.e. using a file
 
-- [x] **Client:** Some REPL.
+- [x] **REPL:** Basic REPL in place, with full-screen terminal, using Blessings.
 
 - [ ] **Storage:** Some storage scheme. Key value store?
+
+- [ ] **Redundancy:** Store the table when program finishes.
 
 - [ ] **Data Types:** Some data types.
 
@@ -20,7 +22,9 @@ Should use Python, since that's the language I'm most familiar with.
 
 - [ ] **Query Engine:** Query execution engine. Optimize.
 
-- [ ] **Query Language:** SQL? Parse it?
+- [x] **Query Language:** Insert, select, delete key value pairs
+
+- [x] **Query Parser:** Yes
 
 
 ## Thoughts
