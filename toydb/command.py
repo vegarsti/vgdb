@@ -1,32 +1,44 @@
-from abc import ABC
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
 
 
+@dataclass  # type: ignore
 class Command(ABC):
-    pass
-
-
-class Insert(Command):
-    s = "i"
-
-    def __init__(self, key: str, value: str) -> None:
-        self.key = key
-        self.value = value
-
-
-class Select(Command):
-    s = "s"
-
-    def __init__(self, key: str) -> None:
-        self.key = key
-
-
-class Delete(Command):
-    s = "d"
-
-    def __init__(self, key: str) -> None:
-        self.key = key
-
-
-class Exit(Command):
-    def __init__(self) -> None:
+    @abstractmethod
+    def string(self) -> str:
         pass
+
+
+@dataclass
+class Insert(Command):
+    key: str
+    value: str
+
+    @property
+    def string(self) -> str:
+        return "i"
+
+
+@dataclass
+class Select(Command):
+    key: str
+
+    @property
+    def string(self) -> str:
+        return "s"
+
+
+@dataclass
+class Delete(Command):
+    key: str
+
+    @property
+    def string(self) -> str:
+        return "d"
+
+
+@dataclass
+class Exit(Command):
+    @property
+    def string(self) -> str:
+        return "_"
