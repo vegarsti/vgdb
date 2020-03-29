@@ -1,8 +1,11 @@
 # toydb
 
 An RDBMS, written as a learning project.
-Inspired/stolen by [Erik Grinaker's toydb](https://github.com/erikgrinaker/toydb).
-Should use Python, since that's the language I'm most familiar with.
+Inspired by [Erik Grinaker's toydb](https://github.com/erikgrinaker/toydb).
+
+To try,
+- Run ``poetry install``
+- Run ``poetry run python toydb/repl.py``
 
 ## Project Outline
 
