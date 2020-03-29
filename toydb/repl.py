@@ -1,5 +1,6 @@
 import sys
 from contextlib import contextmanager
+from enum import Enum
 from typing import Iterator, Optional
 
 from toydb.command import Command, Delete, Exit, Insert, Select
@@ -14,19 +15,26 @@ def repl() -> Iterator[None]:
         sys.exit()
 
 
+class Commands(Enum):
+    INSERT = "i"
+    SELECT = "s"
+    DELETE = "d"
+    EXIT = "_"
+
+
 def parse_command(command: str) -> Optional[Command]:
     if command == "q" or command == "exit" or command == "quit":
         return Exit()
     args = command.split()
     if len(args) == 3:
         c, k, v = args
-        if c == Insert.s:
+        if c == Commands.INSERT.value:
             return Insert(key=k, value=v)
     elif len(args) == 2:
         c, k = args
-        if c == Select.s:
+        if c == Commands.SELECT.value:
             return Select(key=k)
-        elif c == Delete.s:
+        elif c == Commands.DELETE.value:
             return Delete(key=k)
     return None
 
