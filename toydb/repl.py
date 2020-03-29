@@ -48,7 +48,8 @@ def main() -> None:
         with term.fullscreen():
             while True:
                 with term.location(0, term.height - 1):
-                    i = input("> ")
+                    print(term.red("toydb> "), end="")
+                    i = input(" ")
                     command = parse_command(i.lower())
                     if command is None:
                         print(f"invalid command: {i}")
