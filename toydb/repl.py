@@ -45,25 +45,24 @@ def main() -> None:
     with repl():
         db = Table()
         term = Terminal()
-        with term.fullscreen():
+        with term.fullscreen(), term.location(0, 0):
             while True:
-                with term.location(0, term.height - 1):
-                    print(term.red("toydb> "), end="")
-                    i = input(" ")
-                    command = parse_command(i.lower())
-                    if command is None:
-                        print(f"invalid command: {i}")
-                        continue
-                    if isinstance(command, Exit):
-                        break
-                    elif isinstance(command, Insert):
-                        db = db.set(command.key, command.value)
-                        print("OK")
-                    elif isinstance(command, Select):
-                        print(db.get(command.key))
-                    elif isinstance(command, Delete):
-                        db = db.delete(command.key)
-                        print("OK")
+                print(term.red("toydb>"), end="")
+                i = input(" ")
+                command = parse_command(i.lower())
+                if command is None:
+                    print(f"invalid command: {i}")
+                    continue
+                if isinstance(command, Exit):
+                    break
+                elif isinstance(command, Insert):
+                    db = db.set(command.key, command.value)
+                    print("OK")
+                elif isinstance(command, Select):
+                    print(db.get(command.key))
+                elif isinstance(command, Delete):
+                    db = db.delete(command.key)
+                    print("OK")
     print(f"Current database: {db}")
 
 
