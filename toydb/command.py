@@ -8,22 +8,23 @@ class Command(ABC):
 class Insert(Command):
     s = "i"
 
-    def __init__(self, v: int) -> None:
-        self.value = v
+    def __init__(self, key: str, value: str) -> None:
+        self.key = key
+        self.value = value
 
 
 class Select(Command):
     s = "s"
 
-    def __init__(self, v: int) -> None:
-        self.value = v
+    def __init__(self, key: str) -> None:
+        self.key = key
 
 
 class Delete(Command):
     s = "d"
 
-    def __init__(self, v: int) -> None:
-        self.value = v
+    def __init__(self, key: str) -> None:
+        self.key = key
 
 
 class Exit(Command):
