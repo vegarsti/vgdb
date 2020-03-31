@@ -7,6 +7,8 @@ To try,
 - Run ``poetry install``
 - Run ``poetry run python toydb/repl.py``
 
+[![asciicast](https://asciinema.org/a/l5KyIRseeHWgctUb43a0VkPtI.svg)](https://asciinema.org/a/l5KyIRseeHWgctUb43a0VkPtI)
+
 ## Project Outline
 
 - [ ] **Networking:** Some way to communicate between db and client. Could be "networking", i.e. using a file
