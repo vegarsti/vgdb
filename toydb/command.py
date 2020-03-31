@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from typing import List, Sequence
 
 
 @dataclass  # type: ignore
@@ -11,8 +12,7 @@ class Command(ABC):
 
 @dataclass
 class Insert(Command):
-    key: str
-    value: str
+    values: List[str]
 
     @property
     def string(self) -> str:
@@ -21,7 +21,7 @@ class Insert(Command):
 
 @dataclass
 class Select(Command):
-    key: str
+    key: int
 
     @property
     def string(self) -> str:
@@ -29,8 +29,15 @@ class Select(Command):
 
 
 @dataclass
+class SelectAll(Command):
+    @property
+    def string(self) -> str:
+        return "s"
+
+
+@dataclass
 class Delete(Command):
-    key: str
+    key: int
 
     @property
     def string(self) -> str:
@@ -42,3 +49,13 @@ class Exit(Command):
     @property
     def string(self) -> str:
         return "_"
+
+
+@dataclass
+class Create(Command):
+    table_name: str
+    columns: Sequence[str]
+
+    @property
+    def string(self) -> str:
+        return "i"
