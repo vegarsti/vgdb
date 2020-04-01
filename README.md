@@ -13,13 +13,13 @@ To try,
 
 - [ ] **Networking:** Some way to communicate between db and client. Could be "networking", i.e. using a file
 
-- [x] **REPL:** Basic REPL in place, with full-screen terminal, using Blessings.
+- [x] **REPL:** Basic REPL in place, with full-screen terminal, using Blessings (full screen and location) and Python Prompt Toolkit (history and colors).
 
-- [ ] **Storage:** Some storage scheme. Key value store?
+- [ ] **Storage:** Some storage scheme. Just Python dataclasses for now.
 
 - [ ] **Redundancy:** Store the table when program finishes.
 
-- [ ] **Data Types:** Some data types.
+- [ ] **Data Types:** Some data types. Str and int for now.
 
 - [ ] **Schemas:** Compulsory singular primary keys, unique and foreign key constraints, indexes.
 
@@ -27,13 +27,13 @@ To try,
 
 - [ ] **Query Engine:** Query execution engine. Optimize.
 
-- [x] **Query Language:** Insert, select, delete key value pairs
+- [x] **Query Language:** Insert, select
 
-- [x] **Query Parser:** Yes
+- [x] **Query Parser:** Yes, ish
 
 
 ## Thoughts
 
-Can the REPL be a function `f: DB -> DB`, in the spirit of Functional Core, Imperative Shell, à la Gary Bernhardt?
-
-Basic REPL in place.
+- Can the REPL be a function `f: DB -> DB`, in the spirit of Functional Core, Imperative Shell, à la Gary Bernhardt?
+- REPL with color and history in place. Fun!
+- Insert and select for str and int to be supported soon.
