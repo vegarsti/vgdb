@@ -1,12 +1,27 @@
 import pytest
 
-from toydb.command import Command, Insert
+from toydb.command import CreateTable, Exit, Insert, Select
+from toydb.repl import parse_command
 
 
-class TestCommand:
-    def test_command_is_abstract(self):
-        with pytest.raises(TypeError):
-            Command()
+class TestParseCommand:
+    def test_exit_ok(self):
+        assert parse_command("q") == Exit()
 
-    def test_insert(self):
-        assert Insert(key="a", value="b").string == "i"
+    def test_select_ok(self):
+        assert parse_command("select") == Select()
+
+    def test_insert_ok(self):
+        assert parse_command("insert a") == Insert(values=["a"])
+
+    def test_create_table_ok(self):
+        assert parse_command("create table a b str") == CreateTable(table_name="a", columns=[("b", str)])
+
+    def test_insert_fail(self):
+        assert parse_command("insert") is None
+
+    @pytest.mark.parametrize(
+        argnames="command", argvalues=["create", "create table", "create table tbl", "create table tbl a"]
+    )
+    def test_create_table_fail(self, command):
+        assert parse_command(command) is None

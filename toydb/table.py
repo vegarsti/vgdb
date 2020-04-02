@@ -1,39 +1,32 @@
 import json
-from typing import Iterator, List, Optional, Sequence, Tuple
+from typing import Dict, Iterator, List, Sequence, Tuple, Type, Union
 
 
 class Table:
-    def __init__(self, name: str, spec: Sequence[str]) -> None:
-        self._name = name
-        self._spec = set(spec)
-        self._columns = len(self._spec)
-        self._records: List[Tuple[int, List[str]]] = []
-        self._min_available_index = 0
+    def __init__(self, name: str, columns: Sequence[Tuple[str, Type]]) -> None:
+        self.name = name
+        self._spec = tuple(columns)
+        self._columns: Dict[str, Type] = {name: type_ for name, type_ in columns}
+        self._records: List[List[Union[int, str]]] = []
 
-    def get(self, i: int) -> Optional[List[str]]:
-        for idx, (j, record) in enumerate(self._records):
-            if i == j:
-                return record
-        return None
+    @property
+    def columns(self) -> str:
+        d: Dict[Type, str] = {str: "str", int: "int"}
+        return "{" + ", ".join(f"{name}: {d[type_]}" for name, type_ in self._columns.items()) + "}"
 
-    def get_all(self) -> Iterator[List[str]]:
-        for _, record in self._records:
+    def get_all(self) -> Iterator[List[Union[int, str]]]:
+        for record in self._records:
             yield record
 
-    def insert(self, record: Sequence[str]) -> bool:
-        if len(record) == self._columns:
-            self._records.append((self._min_available_index, list(record)))
-            self._min_available_index += 1
+    def insert(self, record: Sequence[Union[int, str]]) -> bool:
+        if len(record) == len(self._columns.items()):
+            for v, t in zip(record, self._columns.values()):
+                if not isinstance(v, t):
+                    return False
+            self._records.append(list(record))
             return True
         else:
             return False
-
-    def delete(self, i: int) -> bool:
-        for idx, (j, _) in enumerate(self._records):
-            if i == j:
-                self._records.pop(idx)
-                return True
-        return False
 
     def __str__(self) -> str:
         return json.dumps(self._records)
