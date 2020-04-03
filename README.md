@@ -7,7 +7,8 @@ To try,
 - Run ``poetry install``
 - Run ``poetry run python toydb/repl.py``
 
-<script id="asciicast-l5KyIRseeHWgctUb43a0VkPtI" src="https://asciinema.org/a/l5KyIRseeHWgctUb43a0VkPtI.js" async></script>
+![toydb](https://user-images.githubusercontent.com/5699893/77996404-d6a3c100-732d-11ea-81db-9de5f5fd0a11.gif)
+
 
 ## Project Outline
 
