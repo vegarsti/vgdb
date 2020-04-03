@@ -18,12 +18,16 @@ class Table:
         for record in self._records:
             yield record
 
-    def insert(self, record: Sequence[Union[int, str]]) -> bool:
+    def insert(self, record: Sequence[str]) -> bool:
         if len(record) == len(self._columns.items()):
+            record_ = []
             for v, t in zip(record, self._columns.values()):
-                if not isinstance(v, t):
+                try:
+                    v_ = t(v)
+                    record_.append(v_)
+                except ValueError:
                     return False
-            self._records.append(list(record))
+            self._records.append(record_)
             return True
         else:
             return False

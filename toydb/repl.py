@@ -105,15 +105,12 @@ def loop() -> None:
             continue
         if isinstance(command, Exit):
             break
-        if not isinstance(command, Command):
-            print("weird")
-            continue
         table = handle_command(table=table, command=command)
     print(f"Current database: {table}")
 
 
 def main() -> None:
-    fullscreen = False
+    fullscreen = True
     if fullscreen:
         term = Terminal()
         with term.fullscreen(), term.location(0, 0):
