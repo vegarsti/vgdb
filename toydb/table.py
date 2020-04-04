@@ -18,15 +18,15 @@ class Table:
         for record in self._records:
             yield record
 
+    def _strings_to_record(self, record: Sequence[str]) -> List[Union[int, str]]:
+        return [type_(value) for value, type_ in zip(record, self._columns.values())]
+
     def insert(self, record: Sequence[str]) -> bool:
         if len(record) == len(self._columns.items()):
-            record_ = []
-            for v, t in zip(record, self._columns.values()):
-                try:
-                    v_ = t(v)
-                    record_.append(v_)
-                except ValueError:
-                    return False
+            try:
+                record_ = self._strings_to_record(record)
+            except ValueError:
+                return False
             self._records.append(record_)
             return True
         else:
