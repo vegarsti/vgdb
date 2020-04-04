@@ -82,7 +82,7 @@ def handle_command(table: Optional[Table], command: Command) -> Optional[Table]:
             if table is None:
                 print("no table selected")
             else:
-                for record in table.get_all():
+                for record in table.select():
                     print(record)
         else:
             raise ValueError("command not handled")

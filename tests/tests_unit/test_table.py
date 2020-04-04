@@ -15,4 +15,4 @@ class TestTable:
         t = Table(name="a", columns=[("b", int)])
         t.insert(["1"])
         t.insert(["2"])
-        assert list(i for i in t.get_all()) == [[1], [2]]
+        assert list(i for i in t.select()) == [[1], [2]]

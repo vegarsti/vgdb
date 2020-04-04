@@ -14,7 +14,7 @@ class Table:
         d: Dict[Type, str] = {str: "str", int: "int"}
         return "{" + ", ".join(f"{name}: {d[type_]}" for name, type_ in self._columns.items()) + "}"
 
-    def get_all(self) -> Iterator[List[Union[int, str]]]:
+    def select(self) -> Iterator[List[Union[int, str]]]:
         for record in self._records:
             yield record
 
