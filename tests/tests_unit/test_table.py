@@ -31,3 +31,9 @@ class TestTable:
         records = list(i for i in t.select())
         assert all(isinstance(record, Record) for record in records)
         assert records == [Record(data=["a", 1]), Record(data=["b", 2])]
+
+    def test_repr(self):
+        table = Table(name="hei", columns=[("a", str), ("b", int)])
+        table.insert(["a", "1"])
+        table.insert(["hello", "9001"])
+        assert str(table) == "a 1\nhello 9001"

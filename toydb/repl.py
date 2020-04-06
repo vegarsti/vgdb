@@ -77,7 +77,7 @@ def handle_command(table: Optional[Table], command: Command) -> Optional[Table]:
                 if success:
                     print("OK")
                 else:
-                    print(f"incorrect number of values, table has schema {table.columns}")
+                    print(f"attempted to insert incorrect record, table has schema {table.columns}")
         elif isinstance(command, Select):
             if table is None:
                 print("no table selected")
@@ -106,11 +106,12 @@ def loop() -> None:
         if isinstance(command, Exit):
             break
         table = handle_command(table=table, command=command)
-    print(f"Current database: {table}")
+    print("Current database")
+    print(table)
 
 
 def main() -> None:
-    fullscreen = True
+    fullscreen = False
     if fullscreen:
         term = Terminal()
         with term.fullscreen(), term.location(0, 0):

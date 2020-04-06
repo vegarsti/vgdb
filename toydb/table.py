@@ -1,4 +1,3 @@
-import json
 from typing import Dict, Iterator, List, Sequence, Tuple, Type
 
 from toydb.record import Record
@@ -35,5 +34,5 @@ class Table:
         else:
             return False
 
-    def __str__(self) -> str:
-        return json.dumps(self._records)
+    def __repr__(self) -> str:
+        return "\n".join(str(record) for record in self.select())
