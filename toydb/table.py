@@ -1,6 +1,6 @@
 from typing import Dict, Iterator, List, Sequence, Tuple, Type
 
-from toydb.record import Record
+from toydb.row import Row
 
 
 class Table:
@@ -8,20 +8,20 @@ class Table:
         self.name = name
         self._spec = tuple(columns)
         self._columns: Dict[str, Type] = {name: type_ for name, type_ in columns}
-        self._records: List[Record] = []
+        self._records: List[Row] = []
 
     @property
     def columns(self) -> str:
         d: Dict[Type, str] = {str: "str", int: "int"}
         return "{" + ", ".join(f"{name}: {d[type_]}" for name, type_ in self._columns.items()) + "}"
 
-    def select(self) -> Iterator[Record]:
+    def select(self) -> Iterator[Row]:
         for record in self._records:
             yield record
 
-    def _strings_to_record(self, record: Sequence[str]) -> Record:
+    def _strings_to_record(self, record: Sequence[str]) -> Row:
         data = [type_(value) for value, type_ in zip(record, self._columns.values())]
-        return Record(data=data)
+        return Row(data=data)
 
     def insert(self, record: Sequence[str]) -> bool:
         if len(record) == len(self._columns.items()):
