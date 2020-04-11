@@ -4,8 +4,8 @@ An RDBMS, written as a learning project.
 Inspired by [Erik Grinaker's toydb](https://github.com/erikgrinaker/toydb).
 
 To try,
-- Run ``poetry install``
-- Run ``poetry run python toydb/repl.py``
+- ``poetry install``
+- ``poetry run python toydb/repl.py``
 
 ![toydb](https://user-images.githubusercontent.com/5699893/77996404-d6a3c100-732d-11ea-81db-9de5f5fd0a11.gif)
 
