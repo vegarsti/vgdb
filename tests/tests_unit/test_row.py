@@ -10,10 +10,6 @@ class PseudoRow:
 
 
 class TestRow:
-    def test_repr(self):
-        r = Row(data=[1, "a"])
-        assert str(r) == "1 a"
-
     def test_eq_true(self):
         r1 = Row(data=[1, "a"])
         r2 = Row(data=[1, "a"])
