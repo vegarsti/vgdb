@@ -3,12 +3,13 @@ from typing import List, Optional, Sequence, Tuple, Type
 from toydb.command import Command, Commands, CreateTable, Exit, Insert, Select
 
 
-def parse_columns(columns_: List[str]) -> Optional[Sequence[Tuple[str, Type]]]:
-    number_of_columns = len(columns_) // 2
+def parse_schema(columns_: List[str]) -> Optional[Sequence[Tuple[str, Type]]]:
     columns = []
-    for i in range(number_of_columns):
-        column_name = columns_[i * 2]
-        column_type_str = columns_[i * 2 + 1]
+    for column_schema in columns_:
+        column_str = column_schema.split(" ")
+        if len(column_str) != 2:
+            return None
+        column_name, column_type_str = column_str
         column_type = {"str": str, "int": int}.get(column_type_str)
         if column_type is None:
             return None
@@ -30,10 +31,11 @@ def parse_command(command: str) -> Optional[Command]:
         if args[1] != "table":
             return None
         table_name = args[2]
-        columns_ = args[3:]
-        if len(columns_) % 2 != 0:
+        schema_str = " ".join(args[3:])
+        if not (schema_str[0] == "(" and schema_str[-1] == ")"):
             return None
-        columns = parse_columns(columns_)
+        columns_ = [c.strip() for c in schema_str[1:-1].split(",")]
+        columns = parse_schema(columns_)
         if columns is None:
             return None
         return CreateTable(table_name=table_name, columns=columns)

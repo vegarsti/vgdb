@@ -20,8 +20,13 @@ class TestParseCommand:
     def test_insert_ok(self):
         assert parse_command("insert a") == Insert(values=["a"])
 
-    def test_create_table_ok(self):
-        assert parse_command("create table a b str") == CreateTable(table_name="a", columns=[("b", str)])
+    def test_create_table_ok__1(self):
+        assert parse_command("create table a (b str)") == CreateTable(table_name="a", columns=[("b", str)])
+
+    def test_create_table_ok__2(self):
+        assert parse_command("create table tbl (a int, b str)") == CreateTable(
+            table_name="tbl", columns=[("a", int), ("b", str)]
+        )
 
     def test_insert_fail(self):
         assert parse_command("insert") is None

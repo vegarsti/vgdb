@@ -53,7 +53,7 @@ def handle_command(table: Optional[Table], command: Command) -> Optional[Table]:
                 if success:
                     print("OK")
                 else:
-                    print(f"attempted to insert incorrect record, table has schema {table.columns}")
+                    print(f"attempted to insert invalid record, table has schema {table.columns}")
         elif isinstance(command, Select):
             if table is None:
                 print("no table selected")

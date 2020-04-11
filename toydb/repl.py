@@ -20,7 +20,7 @@ def loop() -> None:
             c = session.prompt(message)
         except (KeyboardInterrupt, EOFError):
             sys.exit(1)
-        command = parse_command(c.lower())
+        command = parse_command(c.lower().strip())
         if command is None:
             print(f"invalid command: {c}")
             continue

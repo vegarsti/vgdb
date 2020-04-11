@@ -34,7 +34,7 @@ class Table:
         return column_indices_to_select
 
     def select(self, columns: List[int]) -> Iterator[List[Union[str, int]]]:
-        for row in self._rows:
+        for row in self.all_rows():
             to_return = [row[i] for i in columns]
             yield to_return
 
