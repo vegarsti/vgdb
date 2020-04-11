@@ -1,4 +1,4 @@
-from typing import Dict, Iterator, List, Sequence, Tuple, Type, Union
+from typing import Dict, Iterator, List, Optional, Sequence, Tuple, Type, Union
 
 from toydb.row import Row
 
@@ -19,7 +19,7 @@ class Table:
         for record in self._rows:
             yield record
 
-    def select(self, columns: List[str]) -> Iterator[List[Union[str, int]]]:
+    def column_indices_from_names(self, columns: List[str]) -> Optional[List[int]]:
         column_indices_to_select = []
         if columns == ["all"]:
             for i, _ in enumerate(self._columns.keys()):
@@ -29,10 +29,13 @@ class Table:
                 try:
                     i = list(self._columns.keys()).index(c)
                 except ValueError:
-                    raise StopIteration
+                    return None
                 column_indices_to_select.append(i)
+        return column_indices_to_select
+
+    def select(self, columns: List[int]) -> Iterator[List[Union[str, int]]]:
         for row in self._rows:
-            to_return = [row[i] for i in column_indices_to_select]
+            to_return = [row[i] for i in columns]
             yield to_return
 
     def _strings_to_row(self, row: Sequence[str]) -> Row:
@@ -49,6 +52,3 @@ class Table:
             return True
         else:
             return False
-
-    def __repr__(self) -> str:
-        return "\n".join(str(record) for record in self.select(["all"]))

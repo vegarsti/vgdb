@@ -93,8 +93,12 @@ def handle_command(table: Optional[Table], command: Command) -> Optional[Table]:
             if table is None:
                 print("no table selected")
             else:
-                table_ = list(table.select(command.columns))
-                print_selection(table_)
+                table_indices = table.column_indices_from_names(command.columns)
+                if table_indices is None:
+                    print(f"incorrect selection, table has schema {table.columns}")
+                else:
+                    table_ = list(table.select(table_indices))
+                    print_selection(table_)
         else:
             raise ValueError("command not handled")
     return table

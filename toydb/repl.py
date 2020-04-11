@@ -26,8 +26,6 @@ def loop() -> None:
         if isinstance(command, Exit):
             break
         table = handle_command(table=table, command=command)
-    print("Current database")
-    print(table)
 
 
 def main() -> None:
