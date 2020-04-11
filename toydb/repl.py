@@ -58,9 +58,12 @@ def parse_command(command: str) -> Optional[Command]:
         values = args[1:]
         return Insert(values=values)
     elif c == Commands.SELECT.value:
-        if len(args) != 1:
+        if len(args) == 1:
             return None
-        return Select()
+        columns_str = " ".join(args[1:])
+        columns_ = [c.strip().replace("*", "all") for c in columns_str.split(",")]
+        if len(columns_) == len(args) - 1:
+            return Select(columns=columns_)
     return None
 
 
@@ -82,7 +85,7 @@ def handle_command(table: Optional[Table], command: Command) -> Optional[Table]:
             if table is None:
                 print("no table selected")
             else:
-                for record in table.select():
+                for record in table.select(command.columns):
                     print(record)
         else:
             raise ValueError("command not handled")

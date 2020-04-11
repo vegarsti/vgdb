@@ -24,11 +24,11 @@ class TestTable:
         t = Table(name="a", columns=[("b", str), ("a", int)])
         assert t._strings_to_record(["hei", 1]) == Row(data=["hei", 1])
 
-    def test_select(self):
+    def test_select_all(self):
         t = Table(name="a", columns=[("a", str), ("b", int)])
         t.insert(["a", "1"])
         t.insert(["b", "2"])
-        records = list(i for i in t.select())
+        records = list(i for i in t.select("all"))
         assert all(isinstance(record, Row) for record in records)
         assert records == [Row(data=["a", 1]), Row(data=["b", 2])]
 

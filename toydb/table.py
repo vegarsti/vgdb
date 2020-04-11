@@ -1,4 +1,4 @@
-from typing import Dict, Iterator, List, Sequence, Tuple, Type
+from typing import Dict, Iterator, List, Optional, Sequence, Tuple, Type
 
 from toydb.row import Row
 
@@ -15,9 +15,28 @@ class Table:
         d: Dict[Type, str] = {str: "str", int: "int"}
         return "{" + ", ".join(f"{name}: {d[type_]}" for name, type_ in self._columns.items()) + "}"
 
-    def select(self) -> Iterator[Row]:
+    def select_all(self) -> Iterator[Optional[Row]]:
         for record in self._records:
             yield record
+
+    def select(self, columns: List[str]) -> Iterator[Optional[str]]:
+        if columns == ["all"]:
+            for r in self.select_all():
+                yield str(r)
+        else:
+            column_indices_to_select = []
+            for c in columns:
+                try:
+                    i = list(self._columns.keys()).index(c)
+                except ValueError:
+                    yield None
+                    raise StopIteration
+                column_indices_to_select.append(i)
+            for record in self._records:
+                to_return = []
+                for i in column_indices_to_select:
+                    to_return.append(str(record[i]))
+                yield " ".join(to_return)
 
     def _strings_to_record(self, record: Sequence[str]) -> Row:
         data = [type_(value) for value, type_ in zip(record, self._columns.values())]
@@ -35,4 +54,4 @@ class Table:
             return False
 
     def __repr__(self) -> str:
-        return "\n".join(str(record) for record in self.select())
+        return "\n".join(str(record) for record in self.select(["all"]))

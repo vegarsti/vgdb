@@ -14,7 +14,7 @@ class Insert(Command):
 
 @dataclass
 class Select(Command):
-    pass
+    columns: List[str]
 
 
 @dataclass

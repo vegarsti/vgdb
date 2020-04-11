@@ -8,8 +8,14 @@ class TestParseCommand:
     def test_exit_ok(self):
         assert parse_command("q") == Exit()
 
-    def test_select_ok(self):
-        assert parse_command("select") == Select()
+    def test_select_all_ok(self):
+        assert parse_command("select *") == Select(columns=["all"])
+
+    def test_select_columns_ok(self):
+        assert parse_command("select a, b") == Select(columns=["a", "b"])
+
+    def test_select_columns_invalid(self):
+        assert parse_command("select a b") is None
 
     def test_insert_ok(self):
         assert parse_command("insert a") == Insert(values=["a"])

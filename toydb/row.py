@@ -13,3 +13,6 @@ class Row:
             return self.data == other.data
         else:
             return False
+
+    def __getitem__(self, item: int) -> Union[int, str]:
+        return self.data[item]
