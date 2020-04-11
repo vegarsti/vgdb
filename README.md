@@ -7,7 +7,7 @@ To try,
 - ``poetry install``
 - ``poetry run python toydb/repl.py``
 
-![toydb](https://user-images.githubusercontent.com/5699893/77996404-d6a3c100-732d-11ea-81db-9de5f5fd0a11.gif)
+![toydb](https://user-images.githubusercontent.com/5699893/79045497-bfa57e80-7c0b-11ea-8c71-34d39fc9b7a7.gif)
 
 
 ## Project Outline
