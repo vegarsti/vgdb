@@ -4,6 +4,7 @@ from typing import List, Optional, Sequence, Tuple, Type
 
 from toydb.print_utils import print_selection
 from toydb.table import Table
+from toydb.where import Where
 
 
 class Commands(Enum):
@@ -27,6 +28,7 @@ class Insert(Command):
 @dataclass
 class Select(Command):
     columns: List[str]
+    where: Optional[Where] = None
 
 
 @dataclass
@@ -62,7 +64,12 @@ def handle_command(table: Optional[Table], command: Command) -> Optional[Table]:
                 if table_indices is None:
                     print(f"incorrect selection, table has schema {table.columns}")
                 else:
-                    table_ = list(table.select(table_indices))
+                    if command.where is not None:
+                        i = table.column_name_to_index(command.where.column)
+                        if i is None:
+                            print(f"incorrect column {command.where.column}, table has schema {table.columns}")
+                            return table
+                    table_ = list(table.select(table_indices, where=command.where))
                     print_selection(table_)
         else:
             raise ValueError("command not handled")

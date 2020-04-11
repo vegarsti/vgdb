@@ -2,6 +2,7 @@ import pytest
 
 from toydb.command import CreateTable, Exit, Insert, Select
 from toydb.query_parser import parse_command
+from toydb.where import Predicate, Where
 
 
 class TestParseCommand:
@@ -13,6 +14,11 @@ class TestParseCommand:
 
     def test_select_columns_ok(self):
         assert parse_command("select a, b") == Select(columns=["a", "b"])
+
+    def test_select_with_where(self):
+        assert parse_command("select a, b where a = 1") == Select(
+            columns=["a", "b"], where=Where(column="a", predicate=Predicate.EQUAL, value="1")
+        )
 
     def test_select_columns_invalid(self):
         assert parse_command("select a b") is None

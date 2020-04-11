@@ -1,6 +1,7 @@
 from typing import List, Optional, Sequence, Tuple, Type
 
 from toydb.command import Command, Commands, CreateTable, Exit, Insert, Select
+from toydb.where import Predicate, Where
 
 
 def parse_schema(columns_: List[str]) -> Optional[Sequence[Tuple[str, Type]]]:
@@ -47,8 +48,22 @@ def parse_command(command: str) -> Optional[Command]:
     elif c == Commands.SELECT.value:
         if len(args) == 1:
             return None
-        columns_str = " ".join(args[1:])
-        columns_ = [c.strip().replace("*", "all") for c in columns_str.split(",")]
-        if len(columns_) == len(args) - 1:
-            return Select(columns=columns_)
+        if "where" not in args:
+            columns_str = " ".join(args[1:])
+            columns_ = [c.strip().replace("*", "all") for c in columns_str.split(",")]
+            if len(columns_) == len(args) - 1:
+                return Select(columns=columns_)
+        else:
+            split_index = args.index("where")
+            args_ = args[1:split_index]
+            columns_str = " ".join(args_)
+            columns_ = [c.strip().replace("*", "all") for c in columns_str.split(",")]
+            if not len(columns_) == len(args_):
+                return None
+            where_ = args[split_index + 1 :]
+            if len(where_) != 3:
+                return None
+            column_name, predicate, value = where_
+            predicate_ = Predicate(predicate)
+            return Select(columns=columns_, where=Where(column=column_name, predicate=predicate_, value=value))
     return None
