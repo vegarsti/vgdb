@@ -5,7 +5,8 @@ from blessed import Terminal
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
 
-from toydb.command import Exit, handle_command, parse_command
+from toydb.command import Exit, handle_command
+from toydb.query_parser import parse_command
 from toydb.table import Table
 
 

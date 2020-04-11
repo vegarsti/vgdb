@@ -1,6 +1,7 @@
 import pytest
 
-from toydb.command import CreateTable, Exit, Insert, Select, parse_command
+from toydb.command import CreateTable, Exit, Insert, Select
+from toydb.query_parser import parse_command
 
 
 class TestParseCommand:
