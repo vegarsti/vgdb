@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from toydb.table import Table
@@ -7,7 +9,11 @@ class TestTable:
     def test_insert_ok(self):
         t = Table(name="a", columns=[("b", str)])
         t.insert(["hei"])
-        assert t._rows == [["hei"]]
+        p = Path(f"{t.name}.db")
+        assert list(t.all_rows()) == [["hei"]]
+        p = Path(f"{t.name}.db")
+        print(p)
+        p.unlink()
 
     def test_insert_incorrect_value(self):
         t = Table(name="a", columns=[("b", int)])

@@ -1,5 +1,6 @@
 from typing import Dict, Iterator, List, Optional, Sequence, Tuple, Type, Union
 
+from toydb.parse_schema import parse_schema
 from toydb.where import Predicate, Where
 
 
@@ -8,16 +9,21 @@ class Table:
         self.name = name
         self._spec = tuple(columns)
         self._columns: Dict[str, Type] = {name: type_ for name, type_ in columns}
-        self._rows: List[List[Union[int, str]]] = []
 
     @property
     def columns(self) -> str:
         d: Dict[Type, str] = {str: "str", int: "int"}
-        return "{" + ", ".join(f"{name}: {d[type_]}" for name, type_ in self._columns.items()) + "}"
+        return "(" + ", ".join(f"{name} {d[type_]}" for name, type_ in self._columns.items()) + ")"
 
     def all_rows(self) -> Iterator[List[Union[int, str]]]:
-        for record in self._rows:
-            yield record
+        with open(f"{self.name}.db", "r") as f:
+            f.readline()
+            while True:
+                line = f.readline().replace("\n", "")
+                if line == "":
+                    break
+                record = self._strings_to_row(line.split())
+                yield record
 
     def column_name_to_index(self, c: str) -> Optional[int]:
         try:
@@ -58,4 +64,16 @@ class Table:
 
     def insert(self, row: Sequence[str]) -> None:
         row_ = self._strings_to_row(row)
-        self._rows.append(row_)
+        to_write = " ".join(str(cell) for cell in row_)
+        with open(f"{self.name}.db", "a+") as f:
+            f.write(to_write)
+            f.write("\n")
+
+    @classmethod
+    def from_file(cls, table_name: str) -> "Table":
+        with open(f"{table_name}.db", "r+") as f:
+            schema_str = f.readline().strip().replace("\n", "")
+        columns_ = [c.strip() for c in schema_str[1:-1].split(",")]
+        columns = parse_schema(columns_)
+        assert columns is not None
+        return Table(name=table_name, columns=columns)

@@ -7,8 +7,17 @@ from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
 
 from toydb.query_parser import parse_command
-from toydb.statement import CreateTable, Exit, handle_command
+from toydb.statement import CreateTable, Exit, Insert, Select, handle_command
 from toydb.table import Table
+
+
+def create_table(table: Table) -> None:
+    try:
+        with open(f"{table.name}.db", "x") as f:
+            f.write(table.columns)
+            f.write("\n")
+    except FileExistsError:
+        raise ValueError
 
 
 def loop(prompt: Callable[[], str]) -> None:
@@ -26,12 +35,17 @@ def loop(prompt: Callable[[], str]) -> None:
             break
         if isinstance(command, CreateTable):
             table = Table(name=command.table_name, columns=command.columns)
-            print(f"created table {table.name} with schema {table.columns}")
+            try:
+                create_table(table)
+                print(f"created table {table.name} with schema {table.columns}")
+            except ValueError:
+                existing_table = Table.from_file(command.table_name)
+                print(f"table {existing_table.name} already exists with schema {existing_table.columns}")
         else:
             if table is None:
                 print("please create a table")
-            else:
-                table = handle_command(table=table, command=command)
+            if isinstance(command, Select) or isinstance(command, Insert):
+                handle_command(command=command)
 
 
 def main() -> None:

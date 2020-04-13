@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional, Sequence, Tuple, Type
+from typing import List, Optional, Sequence, Tuple, Type, Union
 
+from toydb.get_tables import get_tables
 from toydb.print_utils import print_selection
-from toydb.table import Table
 from toydb.where import Where
 
 
@@ -23,11 +23,13 @@ class Statement:
 @dataclass
 class Insert(Statement):
     values: List[str]
+    table_name: str
 
 
 @dataclass
 class Select(Statement):
     columns: List[str]
+    table_name: str
     where: Optional[Where] = None
 
 
@@ -42,7 +44,12 @@ class CreateTable(Statement):
     columns: Sequence[Tuple[str, Type]]
 
 
-def handle_command(table: Table, command: Statement) -> Table:
+def handle_command(command: Union[Select, Insert]) -> None:
+    tables = get_tables()
+    table = tables.get(command.table_name)
+    if table is None:
+        print(f"table {command.table_name} does not exist")
+        return
     if isinstance(command, Insert):
         try:
             table.insert(command.values)
@@ -53,14 +60,13 @@ def handle_command(table: Table, command: Statement) -> Table:
         table_indices = table.column_indices_from_names(command.columns)
         if table_indices is None:
             print(f"incorrect selection, table has schema {table.columns}")
-            return table
+            return
         if command.where is not None:
             i = table.column_name_to_index(command.where.column)
             if i is None:
                 print(f"incorrect column {command.where.column}, table has schema {table.columns}")
-                return table
-        table_ = list(table.select(table_indices, where=command.where))
+                return
+        table_ = list(table.select(columns=table_indices, where=command.where))
         print_selection(table_)
     else:
         raise ValueError("command not handled")
-    return table
