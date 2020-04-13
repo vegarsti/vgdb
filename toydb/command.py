@@ -42,35 +42,26 @@ class CreateTable(Command):
     columns: Sequence[Tuple[str, Type]]
 
 
-def handle_command(table: Optional[Table], command: Command) -> Optional[Table]:
-    if isinstance(command, CreateTable):
-        table = Table(name=command.table_name, columns=command.columns)
-        print(f"created table {table.name} with schema {table.columns}")
-    else:
-        if isinstance(command, Insert):
-            if table is None:
-                print("no table selected")
-            else:
-                success = table.insert(command.values)
-                if success:
-                    print("OK")
-                else:
-                    print(f"attempted to insert invalid record, table has schema {table.columns}")
-        elif isinstance(command, Select):
-            if table is None:
-                print("no table selected")
-            else:
-                table_indices = table.column_indices_from_names(command.columns)
-                if table_indices is None:
-                    print(f"incorrect selection, table has schema {table.columns}")
-                else:
-                    if command.where is not None:
-                        i = table.column_name_to_index(command.where.column)
-                        if i is None:
-                            print(f"incorrect column {command.where.column}, table has schema {table.columns}")
-                            return table
-                    table_ = list(table.select(table_indices, where=command.where))
-                    print_selection(table_)
+def handle_command(table: Table, command: Command) -> Table:
+    if isinstance(command, Insert):
+        success = table.valid_insert(row=command.values)
+        if success:
+            table.insert(command.values)
+            print("OK")
         else:
-            raise ValueError("command not handled")
+            print(f"attempted to insert invalid record, table has schema {table.columns}")
+    elif isinstance(command, Select):
+        table_indices = table.column_indices_from_names(command.columns)
+        if table_indices is None:
+            print(f"incorrect selection, table has schema {table.columns}")
+            return table
+        if command.where is not None:
+            i = table.column_name_to_index(command.where.column)
+            if i is None:
+                print(f"incorrect column {command.where.column}, table has schema {table.columns}")
+                return table
+        table_ = list(table.select(table_indices, where=command.where))
+        print_selection(table_)
+    else:
+        raise ValueError("command not handled")
     return table

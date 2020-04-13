@@ -65,10 +65,6 @@ class Table:
                 return False
         return False
 
-    def insert(self, row: Sequence[str]) -> bool:
-        if self.valid_insert(row=row):
-            row_ = self._strings_to_row(row)
-            self._rows.append(row_)
-            return True
-        else:
-            return False
+    def insert(self, row: Sequence[str]) -> None:
+        row_ = self._strings_to_row(row)
+        self._rows.append(row_)

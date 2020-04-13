@@ -5,7 +5,7 @@ from blessed import Terminal
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
 
-from toydb.command import Exit, handle_command
+from toydb.command import CreateTable, Exit, handle_command
 from toydb.query_parser import parse_command
 from toydb.table import Table
 
@@ -26,7 +26,14 @@ def loop() -> None:
             continue
         if isinstance(command, Exit):
             break
-        table = handle_command(table=table, command=command)
+        if isinstance(command, CreateTable):
+            table = Table(name=command.table_name, columns=command.columns)
+            print(f"created table {table.name} with schema {table.columns}")
+        else:
+            if table is None:
+                print("please create a table")
+            else:
+                table = handle_command(table=table, command=command)
 
 
 def main() -> None:
