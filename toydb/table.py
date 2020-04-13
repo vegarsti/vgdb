@@ -1,6 +1,5 @@
 from typing import Dict, Iterator, List, Optional, Sequence, Tuple, Type, Union
 
-from toydb.row import Row
 from toydb.where import Predicate, Where
 
 
@@ -9,14 +8,14 @@ class Table:
         self.name = name
         self._spec = tuple(columns)
         self._columns: Dict[str, Type] = {name: type_ for name, type_ in columns}
-        self._rows: List[Row] = []
+        self._rows: List[List[Union[int, str]]] = []
 
     @property
     def columns(self) -> str:
         d: Dict[Type, str] = {str: "str", int: "int"}
         return "{" + ", ".join(f"{name}: {d[type_]}" for name, type_ in self._columns.items()) + "}"
 
-    def all_rows(self) -> Iterator[Row]:
+    def all_rows(self) -> Iterator[List[Union[int, str]]]:
         for record in self._rows:
             yield record
 
@@ -53,16 +52,22 @@ class Table:
                 to_return = [row[i] for i in columns]
                 yield to_return
 
-    def _strings_to_row(self, row: Sequence[str]) -> Row:
+    def _strings_to_row(self, row: Sequence[str]) -> List[Union[int, str]]:
         data = [type_(value) for value, type_ in zip(row, self._columns.values())]
-        return Row(data=data)
+        return data
 
-    def insert(self, row: Sequence[str]) -> bool:
+    def valid_insert(self, row: Sequence[str]) -> bool:
         if len(row) == len(self._columns.items()):
             try:
-                row_ = self._strings_to_row(row)
+                self._strings_to_row(row)
+                return True
             except ValueError:
                 return False
+        return False
+
+    def insert(self, row: Sequence[str]) -> bool:
+        if self.valid_insert(row=row):
+            row_ = self._strings_to_row(row)
             self._rows.append(row_)
             return True
         else:
