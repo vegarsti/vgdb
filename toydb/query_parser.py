@@ -1,6 +1,6 @@
 from typing import List, Optional, Sequence, Tuple, Type
 
-from toydb.command import Command, Commands, CreateTable, Exit, Insert, Select
+from toydb.statement import Commands, CreateTable, Exit, Insert, Select, Statement
 from toydb.where import Predicate, Where
 
 
@@ -19,7 +19,7 @@ def parse_schema(columns_: List[str]) -> Optional[Sequence[Tuple[str, Type]]]:
     return columns
 
 
-def parse_command(command: str) -> Optional[Command]:
+def parse_command(command: str) -> Optional[Statement]:
     args = command.split()
     if len(args) == 0:
         return None

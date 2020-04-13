@@ -16,33 +16,33 @@ class Commands(Enum):
 
 
 @dataclass
-class Command:
+class Statement:
     pass
 
 
 @dataclass
-class Insert(Command):
+class Insert(Statement):
     values: List[str]
 
 
 @dataclass
-class Select(Command):
+class Select(Statement):
     columns: List[str]
     where: Optional[Where] = None
 
 
 @dataclass
-class Exit(Command):
+class Exit(Statement):
     pass
 
 
 @dataclass
-class CreateTable(Command):
+class CreateTable(Statement):
     table_name: str
     columns: Sequence[Tuple[str, Type]]
 
 
-def handle_command(table: Table, command: Command) -> Table:
+def handle_command(table: Table, command: Statement) -> Table:
     if isinstance(command, Insert):
         success = table.valid_insert(row=command.values)
         if success:

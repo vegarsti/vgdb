@@ -1,7 +1,7 @@
 import pytest
 
-from toydb.command import CreateTable, Exit, Insert, Select
 from toydb.query_parser import parse_command
+from toydb.statement import CreateTable, Exit, Insert, Select
 from toydb.where import Predicate, Where
 
 
