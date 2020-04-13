@@ -56,15 +56,6 @@ class Table:
         data = [type_(value) for value, type_ in zip(row, self._columns.values())]
         return data
 
-    def valid_insert(self, row: Sequence[str]) -> bool:
-        if len(row) == len(self._columns.items()):
-            try:
-                self._strings_to_row(row)
-                return True
-            except ValueError:
-                return False
-        return False
-
     def insert(self, row: Sequence[str]) -> None:
         row_ = self._strings_to_row(row)
         self._rows.append(row_)

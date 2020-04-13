@@ -44,11 +44,10 @@ class CreateTable(Statement):
 
 def handle_command(table: Table, command: Statement) -> Table:
     if isinstance(command, Insert):
-        success = table.valid_insert(row=command.values)
-        if success:
+        try:
             table.insert(command.values)
             print("OK")
-        else:
+        except ValueError:
             print(f"attempted to insert invalid record, table has schema {table.columns}")
     elif isinstance(command, Select):
         table_indices = table.column_indices_from_names(command.columns)
