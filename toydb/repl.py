@@ -1,5 +1,6 @@
 import sys
-from typing import Optional
+from functools import partial
+from typing import Callable, Optional
 
 from blessed import Terminal
 from prompt_toolkit import PromptSession
@@ -10,14 +11,11 @@ from toydb.statement import CreateTable, Exit, handle_command
 from toydb.table import Table
 
 
-def loop() -> None:
-    style = Style.from_dict({"prompt": "red"})
-    message = [("class:prompt", "toydb> ")]
-    session = PromptSession(style=style)
+def loop(prompt: Callable[[], str]) -> None:
     table: Optional[Table] = None
     while True:
         try:
-            c = session.prompt(message)
+            c = prompt()
         except (KeyboardInterrupt, EOFError):
             sys.exit(1)
         command = parse_command(c.lower().strip())
@@ -37,13 +35,17 @@ def loop() -> None:
 
 
 def main() -> None:
+    style = Style.from_dict({"prompt": "red"})
+    message = [("class:prompt", "toydb> ")]
+    session = PromptSession(style=style)
+    toydb_prompt = partial(session.prompt, message)
     fullscreen = False
     if fullscreen:
         term = Terminal()
         with term.fullscreen(), term.location(0, 0):
-            loop()
+            loop(toydb_prompt)
     else:
-        loop()
+        loop(toydb_prompt)
 
 
 if __name__ == "__main__":
