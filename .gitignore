@@ -2,3 +2,4 @@
 .mypy_cache
 *egg-info
 *.db
+test.py
