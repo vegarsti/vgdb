@@ -24,7 +24,8 @@ class TestParseCommand:
         assert parse_command("select a b") is None
 
     def test_insert_ok(self):
-        assert parse_command("insert a into b") == Insert(values=["a"], table_name="b")
+        assert parse_command("insert into b values (a)") == Insert(values=["a"], table_name="b")
+        assert parse_command("insert into b values (a, b, c, d)") == Insert(values=["a", "b", "c", "d"], table_name="b")
 
     def test_create_table_ok__1(self):
         assert parse_command("create table a (b str)") == CreateTable(table_name="a", columns=[("b", str)])
@@ -36,7 +37,7 @@ class TestParseCommand:
 
     def test_insert_fail(self):
         assert parse_command("insert") is None
-        assert parse_command("insert a into b c") is None
+        assert parse_command("insert into b values c") is None
 
     @pytest.mark.parametrize(
         argnames="command", argvalues=["create", "create table", "create table tbl", "create table tbl a"]

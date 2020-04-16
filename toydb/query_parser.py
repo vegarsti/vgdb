@@ -29,13 +29,15 @@ def parse_command(command: str) -> Optional[Statement]:
     elif c == Commands.INSERT.value:
         if len(args) == 1:
             return None
-        if "into" not in args:
+        if "into" != args[1]:
             return None
-        into_index = args.index("into")
-        values = args[1:into_index]
-        if len(args) != into_index + 2:
+        table_name = args[2]
+        if "values" != args[3]:
             return None
-        table_name = args[into_index + 1]
+        values_str = " ".join(args[4:])
+        if not (values_str[0] == "(" and values_str[-1] == ")"):
+            return None
+        values = [c.strip() for c in values_str[1:-1].split(",")]
         return Insert(values=values, table_name=table_name)
     elif c == Commands.SELECT.value:
         if "from" not in args:
