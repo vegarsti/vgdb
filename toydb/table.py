@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Dict, Iterator, List, Optional, Sequence, Tuple, Type, Union
 
 from toydb.parse_schema import parse_schema
@@ -7,8 +8,17 @@ from toydb.where import Predicate, Where
 class Table:
     def __init__(self, name: str, columns: Sequence[Tuple[str, Type]]) -> None:
         self.name = name
+        self._file: Path = Path(f"{name}.db")
         self._spec = tuple(columns)
         self._columns: Dict[str, Type] = {name: type_ for name, type_ in columns}
+
+    def create(self) -> None:
+        try:
+            with self._file.open("x") as f:
+                f.write(self.columns)
+                f.write("\n")
+        except FileExistsError:
+            raise ValueError
 
     @property
     def columns(self) -> str:
@@ -16,7 +26,7 @@ class Table:
         return "(" + ", ".join(f"{name} {d[type_]}" for name, type_ in self._columns.items()) + ")"
 
     def all_rows(self) -> Iterator[List[Union[int, str]]]:
-        with open(f"{self.name}.db", "r") as f:
+        with self._file.open("r") as f:
             f.readline()
             while True:
                 line = f.readline().replace("\n", "")
