@@ -1,3 +1,4 @@
+import re
 from typing import Optional
 
 from toydb.parse_schema import parse_schema
@@ -40,21 +41,23 @@ def parse_command(command: str) -> Optional[Statement]:
         values = [c.strip() for c in values_str[1:-1].split(",")]
         return Insert(values=values, table_name=table_name)
     elif c == Commands.SELECT.value:
-        if "from" not in args:
+        select_pattern = r"(select|SELECT) (((\w+)+(, \w+)*)|\*) from (\w+)( where ((\w+) = (\w+)))*"
+        select_match = re.search(pattern=select_pattern, string=command)
+        if select_match is None:
             return None
-        from_index = args.index("from")
-        table_name = args[from_index + 1]
-        columns_str = " ".join(args[1:from_index])
-        columns_ = [c.strip().replace("*", "all") for c in columns_str.split(",")]
-        if "where" not in args:
-            where = None
-        else:
-            where_index = args.index("where")
-            where_ = args[where_index + 1 :]
-            if len(where_) != 3:
-                return None
-            column_name, predicate, value = where_
-            predicate_ = Predicate(predicate)
-            where = Where(column=column_name, predicate=predicate_, value=value)
-        return Select(columns=columns_, where=where, table_name=table_name)
+        column_start, column_end = select_match.regs[2]
+        columns__ = command[column_start:column_end]
+        columns___ = [c.strip().replace("*", "all") for c in columns__.split(",")]
+        table_start, table_end = select_match.regs[6]
+        table_name = command[table_start:table_end]
+        where_start, where_end = select_match.regs[7]
+        where_ = command[where_start:where_end]
+        if where_ == "":
+            column_start, column_end = select_match.regs[9]
+            column_name = command[column_start:column_end]
+            predicate = "="
+            value_start, value_end = select_match.regs[10]
+            value = command[value_start:value_end]
+            where: Optional[Where] = Where(column=column_name, predicate=Predicate(predicate), value=value)
+        return Select(columns=columns___, where=None if where_ == "" else where, table_name=table_name)
     return None
