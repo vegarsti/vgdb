@@ -1,23 +1,20 @@
 import sys
-from typing import Optional
+from functools import partial
+from typing import Callable
 
 from blessed import Terminal
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
 
-from toydb.command import Exit, handle_command
 from toydb.query_parser import parse_command
+from toydb.statement import CreateTable, Exit, Insert, Select, handle_command
 from toydb.table import Table
 
 
-def loop() -> None:
-    style = Style.from_dict({"prompt": "red"})
-    message = [("class:prompt", "toydb> ")]
-    session = PromptSession(style=style)
-    table: Optional[Table] = None
+def loop(prompt: Callable[[], str]) -> None:
     while True:
         try:
-            c = session.prompt(message)
+            c = prompt()
         except (KeyboardInterrupt, EOFError):
             sys.exit(1)
         command = parse_command(c.lower().strip())
@@ -26,17 +23,33 @@ def loop() -> None:
             continue
         if isinstance(command, Exit):
             break
-        table = handle_command(table=table, command=command)
+        if isinstance(command, CreateTable):
+            table = Table(name=command.table_name, columns=command.columns)
+            try:
+                table.create()
+                print(f"created table {table.name} with schema {table.columns}")
+            except ValueError:
+                existing_table = Table.from_file(command.table_name)
+                print(f"table {existing_table.name} already exists with schema {existing_table.columns}")
+        else:
+            if isinstance(command, Select) or isinstance(command, Insert):
+                handle_command(command=command)
+            else:
+                print("huh?")
 
 
 def main() -> None:
+    style = Style.from_dict({"prompt": "red"})
+    message = [("class:prompt", "toydb> ")]
+    session = PromptSession(style=style)
+    toydb_prompt = partial(session.prompt, message)
     fullscreen = False
     if fullscreen:
         term = Terminal()
         with term.fullscreen(), term.location(0, 0):
-            loop()
+            loop(toydb_prompt)
     else:
-        loop()
+        loop(toydb_prompt)
 
 
 if __name__ == "__main__":
