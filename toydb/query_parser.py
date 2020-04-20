@@ -1,4 +1,5 @@
 import re
+from re import Match
 from typing import Optional
 
 from toydb.parse_schema import parse_schema
@@ -41,23 +42,32 @@ def parse_command(command: str) -> Optional[Statement]:
         values = [c.strip() for c in values_str[1:-1].split(",")]
         return Insert(values=values, table_name=table_name)
     elif c == Commands.SELECT.value:
-        select_pattern = r"(select|SELECT) (((\w+)+(, \w+)*)|\*) from (\w+)( where ((\w+) = (\w+)))*"
-        select_match = re.search(pattern=select_pattern, string=command)
-        if select_match is None:
-            return None
-        column_start, column_end = select_match.regs[2]
-        columns__ = command[column_start:column_end]
-        columns___ = [c.strip().replace("*", "all") for c in columns__.split(",")]
-        table_start, table_end = select_match.regs[6]
-        table_name = command[table_start:table_end]
-        where_start, where_end = select_match.regs[7]
-        where_ = command[where_start:where_end]
-        if where_ == "":
-            column_start, column_end = select_match.regs[9]
-            column_name = command[column_start:column_end]
-            predicate = "="
-            value_start, value_end = select_match.regs[10]
-            value = command[value_start:value_end]
-            where: Optional[Where] = Where(column=column_name, predicate=Predicate(predicate), value=value)
-        return Select(columns=columns___, where=None if where_ == "" else where, table_name=table_name)
+        return parse_select(command)
     return None
+
+
+def parse_select(command: str) -> Optional[Statement]:
+    select_pattern = r"(select|SELECT) (((\w+)+(, \w+)*)|\*) from (\w+)( where ((\w+) = (\w+)))*"
+    select_match = re.search(pattern=select_pattern, string=command)
+    if select_match is None:
+        return None
+    column_start, column_end = select_match.regs[2]
+    columns__ = command[column_start:column_end]
+    columns___ = [c.strip().replace("*", "all") for c in columns__.split(",")]
+    table_start, table_end = select_match.regs[6]
+    table_name = command[table_start:table_end]
+    where_start, where_end = select_match.regs[7]
+    where_ = command[where_start:where_end]
+    if where_ != "":
+        where = parse_where(command, select_match)
+    return Select(columns=columns___, where=where if where_ != "" else None, table_name=table_name)
+
+
+def parse_where(command: str, select_match: Match[str]) -> Where:
+    column_start, column_end = select_match.regs[9]
+    column_name = command[column_start:column_end]
+    predicate = "="
+    value_start, value_end = select_match.regs[10]
+    value = command[value_start:value_end]
+    where = Where(column=column_name, predicate=Predicate(predicate), value=value)
+    return where
