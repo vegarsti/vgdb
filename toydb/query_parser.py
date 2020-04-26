@@ -6,6 +6,51 @@ from toydb.statement import Commands, CreateTable, Exit, Insert, Select, Stateme
 from toydb.where import Predicate, Where
 
 
+def parse_create_table(command: str) -> Optional[Statement]:
+    args = command.split()
+    if len(args) < 4:
+        return None
+    if args[1] != "table":
+        return None
+    table_name = args[2]
+    schema_str = " ".join(args[3:])
+    if not (schema_str[0] == "(" and schema_str[-1] == ")"):
+        return None
+    columns_ = [c.strip() for c in schema_str[1:-1].split(",")]
+    columns = parse_schema(columns_)
+    if columns is None:
+        return None
+    return CreateTable(table_name=table_name, columns=columns)
+
+
+def parse_insert(command: str) -> Optional[Statement]:
+    args = command.split()
+    if len(args) == 1:
+        return None
+    if "into" != args[1]:
+        return None
+    table_name = args[2]
+    if "values" != args[3]:
+        return None
+    values_str = " ".join(args[4:])
+    if not (values_str[0] == "(" and values_str[-1] == ")"):
+        return None
+    values = [c.strip() for c in values_str[1:-1].split(",")]
+    parsed_values: List[Union[int, str]] = []
+    for value in values:
+        if value.startswith("'"):
+            if not value.endswith("'"):
+                return None
+            parsed_values.append(value[1:-1])
+        else:
+            try:
+                int(value)
+            except ValueError:
+                return None
+            parsed_values.append(int(value))
+    return Insert(values=parsed_values, table_name=table_name)
+
+
 def parse_command(command: str) -> Optional[Statement]:
     args = command.split()
     if len(args) == 0:
@@ -14,44 +59,9 @@ def parse_command(command: str) -> Optional[Statement]:
     if c == Commands.EXIT.value:
         return Exit()
     elif c == Commands.CREATE.value:
-        if len(args) < 4:
-            return None
-        if args[1] != "table":
-            return None
-        table_name = args[2]
-        schema_str = " ".join(args[3:])
-        if not (schema_str[0] == "(" and schema_str[-1] == ")"):
-            return None
-        columns_ = [c.strip() for c in schema_str[1:-1].split(",")]
-        columns = parse_schema(columns_)
-        if columns is None:
-            return None
-        return CreateTable(table_name=table_name, columns=columns)
+        return parse_create_table(command)
     elif c == Commands.INSERT.value:
-        if len(args) == 1:
-            return None
-        if "into" != args[1]:
-            return None
-        table_name = args[2]
-        if "values" != args[3]:
-            return None
-        values_str = " ".join(args[4:])
-        if not (values_str[0] == "(" and values_str[-1] == ")"):
-            return None
-        values = [c.strip() for c in values_str[1:-1].split(",")]
-        parsed_values: List[Union[int, str]] = []
-        for value in values:
-            if value.startswith("'"):
-                if not value.endswith("'"):
-                    return None
-                parsed_values.append(value[1:-1])
-            else:
-                try:
-                    int(value)
-                except ValueError:
-                    return None
-                parsed_values.append(int(value))
-        return Insert(values=parsed_values, table_name=table_name)
+        return parse_insert(command)
     elif c == Commands.SELECT.value:
         return parse_select(command)
     return None
