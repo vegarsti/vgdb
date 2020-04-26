@@ -10,6 +10,7 @@ class Table:
         self.name = name
         self._file: Path = Path(f"{name}.db")
         self._spec = tuple(columns)
+        self._types = [r[1] for r in columns]
         self._columns: Dict[str, Type] = {name: type_ for name, type_ in columns}
 
     def create(self) -> None:
@@ -72,8 +73,11 @@ class Table:
         data = [type_(value) for value, type_ in zip(row, self._columns.values())]
         return data
 
-    def insert(self, row: Sequence[str]) -> None:
-        row_ = self._strings_to_row(row)
+    def insert(self, row: List[Tuple[Union[int, str], Type]]) -> None:
+        types = [r[1] for r in row]
+        if types != self._types:
+            raise ValueError
+        row_ = [r[0] for r in row]
         to_write = " ".join(str(cell) for cell in row_)
         with open(f"{self.name}.db", "a+") as f:
             f.write(to_write)
