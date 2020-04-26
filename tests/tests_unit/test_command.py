@@ -24,8 +24,11 @@ class TestParseCommand:
         assert parse_command("select a b") is None
 
     def test_insert_ok(self):
-        assert parse_command("insert into b values (a)") == Insert(values=["a"], table_name="b")
-        assert parse_command("insert into b values (a, b, c, d)") == Insert(values=["a", "b", "c", "d"], table_name="b")
+        assert parse_command("insert into b values ('a')") == Insert(values=["a"], table_name="b")
+        assert parse_command("insert into b values (1337)") == Insert(values=[1337], table_name="b")
+        assert parse_command("insert into b values ('a', 'b', 'c', 'd')") == Insert(
+            values=["a", "b", "c", "d"], table_name="b"
+        )
 
     def test_create_table_ok__1(self):
         assert parse_command("create table a (b str)") == CreateTable(table_name="a", columns=[("b", str)])

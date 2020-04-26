@@ -32,8 +32,8 @@ class TestTable:
     def test_all_rows(self):
         t = Table(name="a", columns=[("a", str), ("b", int)])
         t.create()
-        t.insert(["a", "1"])
-        t.insert(["b", "2"])
+        t.insert(["a", 1])
+        t.insert(["b", 2])
         rows = list(i for i in t.all_rows())
         assert rows == [["a", 1], ["b", 2]]
         t._file.unlink()
