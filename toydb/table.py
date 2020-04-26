@@ -9,9 +9,8 @@ class Table:
     def __init__(self, name: str, columns: Sequence[Tuple[str, Type]]) -> None:
         self.name = name
         self._file: Path = Path(f"{name}.db")
-        self._spec = tuple(columns)
-        self._types = [r[1] for r in columns]
         self._columns: Dict[str, Type] = {name: type_ for name, type_ in columns}
+        self._types = list(self._columns.values())
 
     def create(self) -> None:
         try:
@@ -58,16 +57,17 @@ class Table:
 
     def select(self, columns: List[int], where: Optional[Where]) -> Iterator[List[Union[str, int]]]:
         for row in self.all_rows():
-            if where is not None:
+            if where is None:
+                to_return = [row[i] for i in columns]
+                yield to_return
+            else:
                 i = self.column_name_to_index(where.column)
                 assert i is not None
                 where_value_typed = list(self._columns.values())[i](where.value)
                 row_matches = {Predicate.EQUAL: lambda a, b: a == b}[where.predicate](row[i], where_value_typed)
-            else:
-                row_matches = True
-            if row_matches:
-                to_return = [row[i] for i in columns]
-                yield to_return
+                if row_matches:
+                    to_return = [row[i] for i in columns]
+                    yield to_return
 
     def _strings_to_row(self, row: Sequence[str]) -> List[Union[int, str]]:
         data = [type_(value) for value, type_ in zip(row, self._columns.values())]
