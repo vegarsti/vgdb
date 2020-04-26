@@ -73,12 +73,11 @@ class Table:
         data = [type_(value) for value, type_ in zip(row, self._columns.values())]
         return data
 
-    def insert(self, row: List[Tuple[Union[int, str], Type]]) -> None:
-        types = [r[1] for r in row]
+    def insert(self, row: List[Union[int, str]]) -> None:
+        types = [type(r) for r in row]
         if types != self._types:
             raise ValueError
-        row_ = [r[0] for r in row]
-        to_write = " ".join(str(cell) for cell in row_)
+        to_write = " ".join(str(cell) for cell in row)
         with open(f"{self.name}.db", "a+") as f:
             f.write(to_write)
             f.write("\n")

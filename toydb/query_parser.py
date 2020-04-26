@@ -1,5 +1,5 @@
 import re
-from typing import List, Match, Optional, Tuple, Type, Union
+from typing import List, Match, Optional, Union
 
 from toydb.parse_schema import parse_schema
 from toydb.statement import Commands, CreateTable, Exit, Insert, Select, Statement
@@ -39,18 +39,18 @@ def parse_command(command: str) -> Optional[Statement]:
         if not (values_str[0] == "(" and values_str[-1] == ")"):
             return None
         values = [c.strip() for c in values_str[1:-1].split(",")]
-        parsed_values: List[Tuple[Union[int, str], Type]] = []
+        parsed_values: List[Union[int, str]] = []
         for value in values:
             if value.startswith("'"):
                 if not value.endswith("'"):
                     return None
-                parsed_values.append((value[1:-1], str))
+                parsed_values.append(value[1:-1])
             else:
                 try:
                     int(value)
                 except ValueError:
                     return None
-                parsed_values.append((int(value), int))
+                parsed_values.append(int(value))
         return Insert(values=parsed_values, table_name=table_name)
     elif c == Commands.SELECT.value:
         return parse_select(command)

@@ -7,7 +7,7 @@ class TestTable:
     def test_insert_ok(self):
         t = Table(name="a", columns=[("b", str)])
         t.create()
-        t.insert([("hei", str)])
+        t.insert(["hei"])
         assert list(t.all_rows()) == [["hei"]]
         t._file.unlink()
 
@@ -15,7 +15,7 @@ class TestTable:
         t = Table(name="a", columns=[("b", int)])
         t.create()
         with pytest.raises(ValueError):
-            t.insert([("a", str)])
+            t.insert(["a"])
         t._file.unlink()
 
     def test_strings_to_record_fails(self):
@@ -32,8 +32,8 @@ class TestTable:
     def test_all_rows(self):
         t = Table(name="a", columns=[("a", str), ("b", int)])
         t.create()
-        t.insert([("a", str), (1, int)])
-        t.insert([("b", str), (2, int)])
+        t.insert(["a", 1])
+        t.insert(["b", 2])
         rows = list(i for i in t.all_rows())
         assert rows == [["a", 1], ["b", 2]]
         t._file.unlink()
