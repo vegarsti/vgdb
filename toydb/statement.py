@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import List, Optional, Sequence, Tuple, Type, Union
+from typing import List, Optional, Tuple, Type, Union
 
 from toydb.get_tables import get_tables
 from toydb.print_utils import print_selection
@@ -41,7 +41,7 @@ class Exit(Statement):
 @dataclass
 class CreateTable(Statement):
     table_name: str
-    columns: Sequence[Tuple[str, Type]]
+    columns: List[Tuple[str, Type]]
 
 
 def handle_command(command: Union[Select, Insert]) -> None:

@@ -1,12 +1,38 @@
 from pathlib import Path
-from typing import Dict, Iterator, List, Optional, Sequence, Tuple, Type, Union
+from typing import IO, Dict, Iterator, List, Optional, Sequence, Tuple, Type, Union
 
-from toydb.parse_schema import parse_schema
 from toydb.where import Predicate, Where
+
+NUMBER_OF_COLUMNS_INT_LENGTH = 1
+ENDIANNESS = "little"
+
+d: Dict[Type, str] = {str: "str", int: "int"}
+d_inv: Dict[str, Type] = {"str": str, "int": int}
+
+
+def read_null_terminated_string(f: IO[bytes]) -> str:
+    s = ""
+    while True:
+        new_byte = f.read(1)
+        if new_byte == b"\x00":
+            break
+        s += new_byte.decode("ascii")
+    return s
+
+
+def write_null_terminated_string(f: IO[bytes], s: str) -> None:
+    f.write(s.encode("ascii"))
+    f.write(b"\x00")
 
 
 class Table:
-    def __init__(self, name: str, columns: Sequence[Tuple[str, Type]]) -> None:
+    """
+    Table file schema:
+    Line 0: Number of columns as 2-sized int
+    Line 0: sequence of column names and types. Column name is string terminated by a null byte
+    """
+
+    def __init__(self, name: str, columns: List[Tuple[str, Type]]) -> None:
         self.name = name
         self._file: Path = Path(f"{name}.db")
         self._spec = tuple(columns)
@@ -14,15 +40,17 @@ class Table:
 
     def create(self) -> None:
         try:
-            with self._file.open("x") as f:
-                f.write(self.columns)
-                f.write("\n")
+            with self._file.open("bx") as f:
+                f.write(len(self._columns).to_bytes(NUMBER_OF_COLUMNS_INT_LENGTH, ENDIANNESS))
+                for column_name, column_type in self._columns.items():
+                    write_null_terminated_string(f, column_name)
+                    write_null_terminated_string(f, d[column_type])
+                f.write(b"\n")
         except FileExistsError:
             raise ValueError
 
     @property
     def columns(self) -> str:
-        d: Dict[Type, str] = {str: "str", int: "int"}
         return "(" + ", ".join(f"{name} {d[type_]}" for name, type_ in self._columns.items()) + ")"
 
     def all_rows(self) -> Iterator[List[Union[int, str]]]:
@@ -81,9 +109,13 @@ class Table:
 
     @classmethod
     def from_file(cls, table_name: str) -> "Table":
-        with open(f"{table_name}.db", "r+") as f:
-            schema_str = f.readline().strip().replace("\n", "")
-        columns_ = [c.strip() for c in schema_str[1:-1].split(",")]
-        columns = parse_schema(columns_)
-        assert columns is not None
+        columns: List[Tuple[str, Type]] = []
+        with open(f"{table_name}.db", "br+") as f:
+            num_columns_as_bytes = f.read(NUMBER_OF_COLUMNS_INT_LENGTH)
+            number_of_columns = int.from_bytes(num_columns_as_bytes, ENDIANNESS)
+            for _ in range(number_of_columns):
+                column_name = read_null_terminated_string(f)
+                column_type = read_null_terminated_string(f)
+                columns.append((column_name, d_inv[column_type]))
+        print(columns)
         return Table(name=table_name, columns=columns)

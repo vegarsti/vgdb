@@ -29,6 +29,7 @@ def loop(prompt: Callable[[], str]) -> None:
                 table.create()
                 print(f"created table {table.name} with schema {table.columns}")
             except ValueError:
+                print(command.table_name)
                 existing_table = Table.from_file(command.table_name)
                 print(f"table {existing_table.name} already exists with schema {existing_table.columns}")
         else:
