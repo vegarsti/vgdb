@@ -4,6 +4,7 @@ from typing import IO, Dict, Iterator, List, Optional, Sequence, Tuple, Type, Un
 from toydb.where import Predicate, Where
 
 NUMBER_OF_COLUMNS_INT_LENGTH = 1
+INT_BYTE_SIZE = 32
 ENDIANNESS = "little"
 
 d: Dict[Type, str] = {str: "str", int: "int"}
@@ -20,16 +21,32 @@ def read_null_terminated_string(f: IO[bytes]) -> str:
     return s
 
 
-def write_null_terminated_string(f: IO[bytes], s: str) -> None:
-    f.write(s.encode("ascii"))
+def write_null_terminated_string(f: IO[bytes], s: str) -> int:
+    s_ascii = s.encode("ascii")
+    f.write(s_ascii)
     f.write(b"\x00")
+    bytes_written = len(s_ascii) + 1
+    return bytes_written
+
+
+def write_int(f: IO[bytes], i: int) -> None:
+    f.write(i.to_bytes(INT_BYTE_SIZE, ENDIANNESS))
+
+
+def read_int_tiny(f: IO[bytes]) -> int:
+    return int.from_bytes(f.read(NUMBER_OF_COLUMNS_INT_LENGTH), ENDIANNESS)
+
+
+def read_int(f: IO[bytes]) -> int:
+    return int.from_bytes(f.read(INT_BYTE_SIZE), ENDIANNESS)
 
 
 class Table:
     """
     Table file schema:
-    Line 0: Number of columns as 2-sized int
-    Line 0: sequence of column names and types. Column name is string terminated by a null byte
+    - Number of columns as NUMBER_OF_COLUMNS_INT_LENGTH sized int
+    - Sequence of column names and types. These strings are terminated by a null byte
+    - Sequence of rows
     """
 
     def __init__(self, name: str, columns: List[Tuple[str, Type]]) -> None:
@@ -37,15 +54,20 @@ class Table:
         self._file: Path = Path(f"{name}.db")
         self._spec = tuple(columns)
         self._columns: Dict[str, Type] = {name: type_ for name, type_ in columns}
+        self._header_bytes = 0
 
     def create(self) -> None:
         try:
+            header_bytes = 0
             with self._file.open("bx") as f:
                 f.write(len(self._columns).to_bytes(NUMBER_OF_COLUMNS_INT_LENGTH, ENDIANNESS))
+                header_bytes += NUMBER_OF_COLUMNS_INT_LENGTH
                 for column_name, column_type in self._columns.items():
-                    write_null_terminated_string(f, column_name)
-                    write_null_terminated_string(f, d[column_type])
-                f.write(b"\n")
+                    wrote = write_null_terminated_string(f, column_name)
+                    header_bytes += wrote
+                    wrote = write_null_terminated_string(f, d[column_type])
+                    header_bytes += wrote
+                self._header_bytes = header_bytes
         except FileExistsError:
             raise ValueError
 
@@ -54,14 +76,20 @@ class Table:
         return "(" + ", ".join(f"{name} {d[type_]}" for name, type_ in self._columns.items()) + ")"
 
     def all_rows(self) -> Iterator[List[Union[int, str]]]:
-        with self._file.open("r") as f:
-            f.readline()
-            while True:
-                line = f.readline().replace("\n", "")
-                if line == "":
-                    break
-                record = self._strings_to_row(line.split())
-                yield record
+        with self._file.open("rb") as f:
+            f.read(self._header_bytes)
+            while f.peek(1) != b"":  # type: ignore
+                row: List[Union[int, str]] = []
+                for typ in self._columns.values():
+                    if typ == str:
+                        s = read_null_terminated_string(f)
+                        row.append(s)
+                    elif typ == int:
+                        i = read_int(f)
+                        row.append(i)
+                    else:
+                        raise ValueError("unsupported type")
+                yield row
 
     def column_name_to_index(self, c: str) -> Optional[int]:
         try:
@@ -100,22 +128,29 @@ class Table:
         data = [type_(value) for value, type_ in zip(row, self._columns.values())]
         return data
 
-    def insert(self, row: Sequence[str]) -> None:
-        row_ = self._strings_to_row(row)
-        to_write = " ".join(str(cell) for cell in row_)
-        with open(f"{self.name}.db", "a+") as f:
-            f.write(to_write)
-            f.write("\n")
+    def insert(self, row: Sequence[Union[int, str]]) -> None:
+        with open(f"{self.name}.db", "ba+") as f:
+            for cell, typ in zip(row, self._columns.values()):
+                if typ == str:
+                    write_null_terminated_string(f, str(cell))
+                elif typ == int:
+                    write_int(f, int(cell))
+                else:
+                    raise ValueError("unsupported type")
 
     @classmethod
     def from_file(cls, table_name: str) -> "Table":
         columns: List[Tuple[str, Type]] = []
         with open(f"{table_name}.db", "br+") as f:
-            num_columns_as_bytes = f.read(NUMBER_OF_COLUMNS_INT_LENGTH)
-            number_of_columns = int.from_bytes(num_columns_as_bytes, ENDIANNESS)
+            header_bytes = 0
+            number_of_columns = read_int_tiny(f)
+            header_bytes += NUMBER_OF_COLUMNS_INT_LENGTH
             for _ in range(number_of_columns):
                 column_name = read_null_terminated_string(f)
+                header_bytes += len(column_name.encode("ascii")) + 1
                 column_type = read_null_terminated_string(f)
+                header_bytes += len(column_type.encode("ascii")) + 1
                 columns.append((column_name, d_inv[column_type]))
-        print(columns)
-        return Table(name=table_name, columns=columns)
+        t = Table(name=table_name, columns=columns)
+        t._header_bytes = header_bytes
+        return t
