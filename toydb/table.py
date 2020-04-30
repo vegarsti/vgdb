@@ -7,8 +7,8 @@ NUMBER_OF_COLUMNS_INT_LENGTH = 1
 INT_BYTE_SIZE = 32
 ENDIANNESS = "little"
 
-d: Dict[Type, str] = {str: "str", int: "int"}
-d_inv: Dict[str, Type] = {"str": str, "int": int}
+d: Dict[Type, str] = {str: "text", int: "int"}
+d_inv: Dict[str, Type] = {"text": str, "int": int}
 
 
 def read_null_terminated_string(f: IO[bytes]) -> str:

@@ -10,8 +10,6 @@ def get_tables() -> Dict[str, Table]:
     for i in p.iterdir():
         if i.suffix == ".db":
             table_name = i.stem
-            if table_name == "tbl":
-                continue
             table = Table.from_file(table_name)
             d[table_name] = table
     return d
