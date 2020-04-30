@@ -4,7 +4,7 @@ from typing import IO, Dict, Iterator, List, Optional, Sequence, Tuple, Type, Un
 from toydb.where import Predicate, Where
 
 NUMBER_OF_COLUMNS_INT_LENGTH = 1
-INT_BYTE_SIZE = 32
+INT_BYTE_SIZE = 4
 ENDIANNESS = "little"
 
 d: Dict[Type, str] = {str: "text", int: "int"}
