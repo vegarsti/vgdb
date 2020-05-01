@@ -31,6 +31,7 @@ class Select(Statement):
     columns: List[str]
     table_name: str
     where: Optional[Where] = None
+    limit: int = -1
 
 
 @dataclass
@@ -66,7 +67,7 @@ def handle_command(command: Union[Select, Insert]) -> None:
             if i is None:
                 print(f"incorrect column {command.where.column}, table has schema {table.columns}")
                 return
-        table_ = list(table.select(columns=table_indices, where=command.where))
+        table_ = list(table.select(columns=table_indices, where=command.where, limit=command.limit))
         print_selection(table_)
     else:
         raise ValueError("command not handled")

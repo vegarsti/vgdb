@@ -1,6 +1,7 @@
 import pytest
 
 from toydb.table import Table
+from toydb.where import Predicate, Where
 
 
 @pytest.fixture
@@ -28,3 +29,17 @@ class TestTable:
         table.insert(["b", "2"])
         rows = list(i for i in table.all_rows())
         assert rows == [["a", 1], ["b", 2]]
+
+    def test_select_limit(self, table):
+        table.insert(["a", 1])
+        table.insert(["b", 2])
+        assert list(table.select(columns=[0, 1])) == [["a", 1], ["b", 2]]
+        assert list(table.select(columns=[0, 1], limit=1)) == [["a", 1]]
+
+    def test_select_where(self, table):
+        table.insert(["a", 1])
+        table.insert(["b", 2])
+        assert list(table.select(columns=[0, 1], where=Where(column="a", predicate=Predicate.EQUAL, value=1))) == [
+            ["a", 1]
+        ]
+        assert list(table.select(columns=[0, 1], where=Where(column="a", predicate=Predicate.EQUAL, value=3))) == []

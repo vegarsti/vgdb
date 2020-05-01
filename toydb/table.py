@@ -55,10 +55,16 @@ class Table:
                 column_indices_to_select.append(j)
         return column_indices_to_select
 
-    def select(self, columns: List[int], where: Optional[Where]) -> Iterator[List[Union[str, int]]]:
+    def select(
+        self, columns: List[int], where: Optional[Where] = None, limit: int = -1
+    ) -> Iterator[List[Union[str, int]]]:
+        count = 0
         for row in self.all_rows():
+            if count == limit:
+                return
             if where is None:
                 to_return = [row[i] for i in columns]
+                count += 1
                 yield to_return
             else:
                 i = self.column_name_to_index(where.column)
@@ -67,6 +73,7 @@ class Table:
                 row_matches = {Predicate.EQUAL: lambda a, b: a == b}[where.predicate](row[i], where_value_typed)
                 if row_matches:
                     to_return = [row[i] for i in columns]
+                    count += 1
                     yield to_return
 
     def _strings_to_row(self, row: Sequence[str]) -> List[Union[int, str]]:
