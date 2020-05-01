@@ -81,17 +81,12 @@ class Storage:
     def from_file(cls, table_name: str) -> "Storage":
         columns: List[Tuple[str, Type]] = []
         with open(f"{table_name}.db", "br+") as f:
-            header_bytes = 0
             number_of_columns = read_tiny_int(f)
-            header_bytes += NUMBER_OF_COLUMNS_INT_LENGTH
             for _ in range(number_of_columns):
                 column_name = read_null_terminated_string(f)
-                header_bytes += len(column_name.encode("ascii")) + 1
                 column_type = read_null_terminated_string(f)
-                header_bytes += len(column_type.encode("ascii")) + 1
                 columns.append((column_name, d_inv[column_type]))
         s = Storage(filename=table_name, columns=columns)
-        s._header_bytes = header_bytes
         return s
 
     def insert(self, row: Sequence[Union[int, str]]) -> None:

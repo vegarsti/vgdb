@@ -6,9 +6,9 @@ from toydb.table import Table
 @pytest.fixture
 def table():
     t = Table(name="a", columns=[("b", str), ("a", int)])
-    t.create()
+    t.persist()
     yield t
-    t._file.unlink()
+    t._file.delete()
 
 
 class TestTable:

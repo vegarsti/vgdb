@@ -21,7 +21,7 @@ class Table:
         self._spec = tuple(columns)
         self._columns: Dict[str, Type] = {name: type_ for name, type_ in columns}
 
-    def create(self) -> None:
+    def persist(self) -> None:
         try:
             self._file.persist()
         except FileExistsError:

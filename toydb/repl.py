@@ -32,7 +32,7 @@ def loop(prompt: Callable[[], str]) -> None:
                 print(f"table {table.name} already exists with schema {table._columns}")
             else:
                 table = Table(name=command.table_name, columns=command.columns)
-                table.create()
+                table.persist()
                 print(f"created table {table.name} with schema {table.columns}")
         else:
             if isinstance(command, Select) or isinstance(command, Insert):
