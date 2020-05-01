@@ -22,7 +22,7 @@ class Statement:
 
 @dataclass
 class Insert(Statement):
-    values: List[str]
+    values: List[Union[int, str]]
     table_name: str
 
 
