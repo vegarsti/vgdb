@@ -1,39 +1,39 @@
-from pathlib import Path
 from typing import Dict, Iterator, List, Optional, Sequence, Tuple, Type, Union
 
-from toydb.parse_schema import parse_schema
+from toydb.storage import Storage
 from toydb.where import Predicate, Where
+
+d: Dict[Type, str] = {str: "text", int: "int"}
+d_inv: Dict[str, Type] = {"text": str, "int": int}
 
 
 class Table:
+    """
+    Table file schema:
+    - Number of columns as NUMBER_OF_COLUMNS_INT_LENGTH sized int
+    - Sequence of column names and types. These strings are terminated by a null byte
+    - Sequence of rows
+    """
+
     def __init__(self, name: str, columns: Sequence[Tuple[str, Type]]) -> None:
         self.name = name
-        self._file: Path = Path(f"{name}.db")
+        self._file = Storage(filename=name, columns=columns)
+        self._spec = tuple(columns)
         self._columns: Dict[str, Type] = {name: type_ for name, type_ in columns}
         self._types = list(self._columns.values())
 
-    def create(self) -> None:
+    def persist(self) -> None:
         try:
-            with self._file.open("x") as f:
-                f.write(self.columns)
-                f.write("\n")
+            self._file.persist()
         except FileExistsError:
             raise ValueError
 
     @property
     def columns(self) -> str:
-        d: Dict[Type, str] = {str: "str", int: "int"}
         return "(" + ", ".join(f"{name} {d[type_]}" for name, type_ in self._columns.items()) + ")"
 
     def all_rows(self) -> Iterator[List[Union[int, str]]]:
-        with self._file.open("r") as f:
-            f.readline()
-            while True:
-                line = f.readline().replace("\n", "")
-                if line == "":
-                    break
-                record = self._strings_to_row(line.split())
-                yield record
+        return self._file.read_rows()
 
     def column_name_to_index(self, c: str) -> Optional[int]:
         try:
@@ -73,20 +73,11 @@ class Table:
         data = [type_(value) for value, type_ in zip(row, self._columns.values())]
         return data
 
-    def insert(self, row: List[Union[int, str]]) -> None:
-        types = [type(r) for r in row]
-        if types != self._types:
-            raise ValueError
-        to_write = " ".join(str(cell) for cell in row)
-        with open(f"{self.name}.db", "a+") as f:
-            f.write(to_write)
-            f.write("\n")
+    def insert(self, row: Sequence[Union[int, str]]) -> None:
+        self._file.insert(row)
 
     @classmethod
-    def from_file(cls, table_name: str) -> "Table":
-        with open(f"{table_name}.db", "r+") as f:
-            schema_str = f.readline().strip().replace("\n", "")
-        columns_ = [c.strip() for c in schema_str[1:-1].split(",")]
-        columns = parse_schema(columns_)
-        assert columns is not None
-        return Table(name=table_name, columns=columns)
+    def from_file(cls, name: str) -> "Table":
+        s = Storage.from_file(name)
+        columns = s._columns_as_they_came
+        return Table(name, columns)

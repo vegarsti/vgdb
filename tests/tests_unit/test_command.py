@@ -31,10 +31,10 @@ class TestParseCommand:
         )
 
     def test_create_table_ok__1(self):
-        assert parse_command("create table a (b str)") == CreateTable(table_name="a", columns=[("b", str)])
+        assert parse_command("create table a (b text)") == CreateTable(table_name="a", columns=[("b", str)])
 
     def test_create_table_ok__2(self):
-        assert parse_command("create table tbl (a int, b str)") == CreateTable(
+        assert parse_command("create table tbl (a int, b text)") == CreateTable(
             table_name="tbl", columns=[("a", int), ("b", str)]
         )
 
