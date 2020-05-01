@@ -19,12 +19,10 @@ def read_null_terminated_string(f: IO[bytes]) -> str:
     return s
 
 
-def write_null_terminated_string(f: IO[bytes], s: str) -> int:
+def write_null_terminated_string(f: IO[bytes], s: str) -> None:
     s_ascii = s.encode("ascii")
     f.write(s_ascii)
     f.write(b"\x00")
-    bytes_written = len(s_ascii) + 1
-    return bytes_written
 
 
 def write_int(f: IO[bytes], i: int) -> None:
@@ -50,21 +48,24 @@ class Storage:
         self._file = Path(f"{filename}.db")
         self._filename = filename
         self._spec = tuple(type_ for name, type_ in columns)
+        self._columns_as_they_came = columns
         self._columns: Dict[str, Type] = {name: type_ for name, type_ in columns}
-        self._header_bytes = 0
+        self._header_bytes = self.infer_header_bytes()
+
+    def infer_header_bytes(self) -> int:
+        s = NUMBER_OF_COLUMNS_INT_LENGTH
+        for column_name, column_type in self._columns.items():
+            s += len(column_name.encode("ascii")) + 1
+            s += len(d[column_type].encode("ascii")) + 1
+        return s
 
     def persist(self) -> None:
         self._error_if_exists()
-        header_bytes = 0
         with self._file.open("wb") as f:
             write_tiny_int(f, len(self._spec))
-            header_bytes += NUMBER_OF_COLUMNS_INT_LENGTH
             for column_name, column_type in self._columns.items():
-                wrote = write_null_terminated_string(f, column_name)
-                header_bytes += wrote
-                wrote = write_null_terminated_string(f, d[column_type])
-                header_bytes += wrote
-        self._header_bytes = header_bytes
+                write_null_terminated_string(f, column_name)
+                write_null_terminated_string(f, d[column_type])
 
     def _error_if_exists(self) -> None:
         try:

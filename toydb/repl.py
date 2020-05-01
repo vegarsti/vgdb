@@ -6,12 +6,14 @@ from blessed import Terminal
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
 
+from toydb.get_tables import get_tables
 from toydb.query_parser import parse_command
 from toydb.statement import CreateTable, Exit, Insert, Select, handle_command
 from toydb.table import Table
 
 
 def loop(prompt: Callable[[], str]) -> None:
+    tables = get_tables()
     while True:
         try:
             c = prompt()
@@ -24,14 +26,14 @@ def loop(prompt: Callable[[], str]) -> None:
         if isinstance(command, Exit):
             break
         if isinstance(command, CreateTable):
-            table = Table(name=command.table_name, columns=command.columns)
-            try:
+            table = tables.get(command.table_name)
+            if table is not None:
+                print(command.table_name)
+                print(f"table {table.name} already exists with schema {table._columns}")
+            else:
+                table = Table(name=command.table_name, columns=command.columns)
                 table.create()
                 print(f"created table {table.name} with schema {table.columns}")
-            except ValueError:
-                print(command.table_name)
-                existing_table = Table.from_file(command.table_name)
-                print(f"table {existing_table.name} already exists with schema {existing_table.columns}")
         else:
             if isinstance(command, Select) or isinstance(command, Insert):
                 handle_command(command=command)
