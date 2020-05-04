@@ -17,6 +17,7 @@ black = "^19.10b0"
 pytest = "^5.4.1"
 pre-commit = "^2.2.0"
 mypy = "^0.770"
+ipython = "^7.14.0"
 
 [tool.black]
 line-length = 120
