@@ -1,6 +1,6 @@
 from typing import Optional
 
-from toydb.token import Token, TokenType, keywords
+from toydb.token import Token, TokenType, keywords, operators
 
 
 class Lexer:
@@ -11,7 +11,7 @@ class Lexer:
 
     @property
     def next_character(self) -> str:
-        if len(self.program) == self.pos:
+        if len(self.program) <= self.pos:
             return ";"
         return self.program[self.pos]
 
@@ -49,6 +49,18 @@ class Lexer:
         self.read_char()
         return Token(token_type=TokenType.INT, literal=self.program[start_position:end_position])
 
+    def read_operator(self) -> Token:
+        start_position = self.pos
+        while self.next_character != " " and self.next_character != ";":
+            self.read_char()
+        end_position = self.pos
+        possible_operator = self.program[start_position:end_position]
+        token_type = operators.get(possible_operator)
+        if token_type is None:
+            raise ValueError(f"{possible_operator} is not a supported operator")
+        self.read_char()
+        return Token(token_type=token_type, literal=possible_operator)
+
     def next_token(self) -> Optional[Token]:
         if self.next_character == ";":
             return None
@@ -60,5 +72,9 @@ class Lexer:
             return self.read_string()
         elif self.next_character.isdigit():
             return self.read_integer()
+        elif self.next_character.isdigit():
+            return self.read_integer()
+        elif self.next_character == "=" or self.next_character == ">" or self.next_character == "<":
+            return self.read_operator()
         else:
             return self.read_keyword()

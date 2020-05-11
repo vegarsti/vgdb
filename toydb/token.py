@@ -11,6 +11,10 @@ class TokenType(Enum):
     INTO = "into"
     VALUES = "values"
     EQUALS = "="
+    GT = ">"
+    LT = "<"
+    GTEQ = ">="
+    LTEQ = "<="
 
 
 keywords = {
@@ -21,7 +25,7 @@ keywords = {
     "values": TokenType.VALUES,
 }
 
-operators = {"=": TokenType.EQUALS}
+operators = {"=": TokenType.EQUALS, ">": TokenType.GT, "<": TokenType.LT, ">=": TokenType.GTEQ, "<=": TokenType.LTEQ}
 
 
 @dataclass
