@@ -1,3 +1,5 @@
+from typing import Optional
+
 from toydb.token import Token, TokenType, keywords
 
 
@@ -40,9 +42,16 @@ class Lexer:
         return Token(token_type=TokenType.STRING, literal=self.program[start_position:end_position])
 
     def read_integer(self) -> Token:
-        return Token(token_type=TokenType.INT, literal="1")
+        start_position = self.pos
+        while self.next_character.isnumeric():
+            self.read_char()
+        end_position = self.pos
+        self.read_char()
+        return Token(token_type=TokenType.INT, literal=self.program[start_position:end_position])
 
-    def next_token(self) -> Token:
+    def next_token(self) -> Optional[Token]:
+        if self.next_character == ";":
+            return None
         if self.next_character == " ":
             self.read_char()
             return self.next_token()

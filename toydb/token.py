@@ -10,6 +10,7 @@ class TokenType(Enum):
     INSERT = "insert"
     INTO = "into"
     VALUES = "values"
+    EQUALS = "="
 
 
 keywords = {
@@ -19,6 +20,8 @@ keywords = {
     "into": TokenType.INTO,
     "values": TokenType.VALUES,
 }
+
+operators = {"=": TokenType.EQUALS}
 
 
 @dataclass
