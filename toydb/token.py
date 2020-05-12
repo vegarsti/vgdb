@@ -15,6 +15,7 @@ class TokenType(Enum):
     LT = "<"
     GTEQ = ">="
     LTEQ = "<="
+    IDENTIFIER = "identifier"
 
 
 keywords = {

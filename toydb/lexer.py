@@ -19,17 +19,19 @@ class Lexer:
         self.current_character = self.next_character
         self.pos += 1
 
-    def read_keyword(self) -> Token:
+    def read_identifier(self) -> Token:
         start_position = self.pos
-        while self.next_character.isalpha():
+        while self.next_character.isalpha() or self.next_character == "_":
             self.read_char()
         end_position = self.pos
-        possible_keyword = self.program[start_position:end_position].lower()
-        token_type = keywords.get(possible_keyword)
-        if token_type is None:
-            raise ValueError(f"{possible_keyword} is not a recognized keyword")
+        identifier = self.program[start_position:end_position].lower()
+        keyword_token = keywords.get(identifier)
+        if keyword_token is None:
+            token_type = TokenType.IDENTIFIER
+        else:
+            token_type = keyword_token
         self.read_char()
-        return Token(token_type=token_type, literal=possible_keyword)
+        return Token(token_type=token_type, literal=identifier)
 
     def read_string(self) -> Token:
         start_position = self.pos
@@ -77,4 +79,4 @@ class Lexer:
         elif self.next_character == "=" or self.next_character == ">" or self.next_character == "<":
             return self.read_operator()
         else:
-            return self.read_keyword()
+            return self.read_identifier()
