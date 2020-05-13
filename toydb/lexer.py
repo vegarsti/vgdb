@@ -49,7 +49,7 @@ class Lexer:
             self.read_char()
         end_position = self.pos
         self.read_char()
-        return Token(token_type=TokenType.INT, literal=self.program[start_position:end_position])
+        return Token(token_type=TokenType.INT, literal=int(self.program[start_position:end_position]))
 
     def read_operator(self) -> Token:
         start_position = self.pos
@@ -64,6 +64,9 @@ class Lexer:
         return Token(token_type=token_type, literal=possible_operator)
 
     def next_token(self) -> Optional[Token]:
+        if self.current_character == ",":
+            self.read_char()
+            return Token(token_type=TokenType.COMMA, literal=",")
         if self.next_character == " ":
             self.read_char()
             return self.next_token()

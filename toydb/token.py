@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Union
 
 
 class TokenType(Enum):
@@ -18,6 +19,7 @@ class TokenType(Enum):
     GTEQ = ">="
     LTEQ = "<="
     IDENTIFIER = "identifier"
+    COMMA = ","
 
 
 keywords = {
@@ -42,7 +44,7 @@ operators = {
 @dataclass
 class Token:
     token_type: TokenType
-    literal: str
+    literal: Union[int, str]
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Token):
