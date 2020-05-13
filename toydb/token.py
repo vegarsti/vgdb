@@ -9,6 +9,7 @@ class TokenType(Enum):
     WHERE = "where"
     INSERT = "insert"
     INTO = "into"
+    FROM = "from"
     VALUES = "values"
     EQUALS = "="
     GT = ">"
@@ -24,6 +25,7 @@ keywords = {
     "insert": TokenType.INSERT,
     "into": TokenType.INTO,
     "values": TokenType.VALUES,
+    "from": TokenType.FROM,
 }
 
 operators = {"=": TokenType.EQUALS, ">": TokenType.GT, "<": TokenType.LT, ">=": TokenType.GTEQ, "<=": TokenType.LTEQ}
