@@ -20,6 +20,8 @@ class TokenType(Enum):
     LTEQ = "<="
     IDENTIFIER = "identifier"
     COMMA = ","
+    LPAREN = "("
+    RPAREN = ")"
 
 
 keywords = {

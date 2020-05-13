@@ -86,5 +86,11 @@ class Lexer:
             or self.next_character == "!"
         ):
             return self.read_operator()
+        if self.next_character == "(":
+            self.read_char()
+            return Token(token_type=TokenType.LPAREN, literal="(")
+        elif self.next_character == ")":
+            self.read_char()
+            return Token(token_type=TokenType.RPAREN, literal=")")
         else:
             return self.read_identifier()
