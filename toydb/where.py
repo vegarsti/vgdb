@@ -4,7 +4,12 @@ from typing import Union
 
 
 class Predicate(Enum):
-    EQUAL = "="
+    EQUALS = "="
+    NOT_EQUALS = "!="
+    LT = "<"
+    GT = ">"
+    LTEQ = "<="
+    GTEQ = ">="
 
 
 @dataclass

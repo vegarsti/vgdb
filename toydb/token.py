@@ -12,6 +12,7 @@ class TokenType(Enum):
     FROM = "from"
     VALUES = "values"
     EQUALS = "="
+    NOT_EQUALS = "!="
     GT = ">"
     LT = "<"
     GTEQ = ">="
@@ -28,7 +29,14 @@ keywords = {
     "from": TokenType.FROM,
 }
 
-operators = {"=": TokenType.EQUALS, ">": TokenType.GT, "<": TokenType.LT, ">=": TokenType.GTEQ, "<=": TokenType.LTEQ}
+operators = {
+    "=": TokenType.EQUALS,
+    ">": TokenType.GT,
+    "<": TokenType.LT,
+    ">=": TokenType.GTEQ,
+    "<=": TokenType.LTEQ,
+    "!=": TokenType.NOT_EQUALS,
+}
 
 
 @dataclass

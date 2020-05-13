@@ -14,10 +14,10 @@ class TestParser:
         assert program == Program(statements=statements)
 
     def test_parse_select_with_were(self):
-        lexer = Lexer(program="select a from b where a = 2")
+        lexer = Lexer(program="select a from b where a = 'a'")
         parser = Parser(lexer=lexer)
         program = parser.parse()
         statements = [
-            Select(columns=["a"], table_name="b", where=Where(column="a", predicate=Predicate.EQUAL, value=2))
+            Select(columns=["a"], table_name="b", where=Where(column="a", predicate=Predicate.EQUALS, value="a"))
         ]
         assert program == Program(statements=statements)

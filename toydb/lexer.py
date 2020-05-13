@@ -64,19 +64,24 @@ class Lexer:
         return Token(token_type=token_type, literal=possible_operator)
 
     def next_token(self) -> Optional[Token]:
-        if self.next_character == ";":
-            return None
         if self.next_character == " ":
             self.read_char()
             return self.next_token()
-        elif self.next_character == "'":
+        if self.next_character == ";":
+            return None
+        if self.next_character == "'":
             self.read_char()
             return self.read_string()
-        elif self.next_character.isdigit():
+        if self.next_character.isdigit():
             return self.read_integer()
-        elif self.next_character.isdigit():
+        if self.next_character.isdigit():
             return self.read_integer()
-        elif self.next_character == "=" or self.next_character == ">" or self.next_character == "<":
+        if (
+            self.next_character == "="
+            or self.next_character == ">"
+            or self.next_character == "<"
+            or self.next_character == "!"
+        ):
             return self.read_operator()
         else:
             return self.read_identifier()
