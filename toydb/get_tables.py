@@ -5,11 +5,10 @@ from toydb.table import Table
 
 
 def get_tables() -> Dict[str, Table]:
-    p = Path.cwd()
-    d = {}
-    for i in p.iterdir():
-        if i.suffix == ".db":
-            table_name = i.stem
+    tables: Dict[str, Table] = {}
+    for p in Path.cwd().iterdir():
+        if p.suffix == ".db":
+            table_name = p.stem
             table = Table.from_file(table_name)
-            d[table_name] = table
-    return d
+            tables[table_name] = table
+    return tables
