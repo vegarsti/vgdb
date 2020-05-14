@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from typing import List
+from typing import List, Union
 
-from toydb.statement import Statement
+from toydb.statement import Insert, Select
 
 
 @dataclass
 class Program:
-    statements: List[Statement]
+    statements: List[Union[Select, Insert]]

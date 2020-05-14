@@ -31,6 +31,8 @@ class Lexer:
         else:
             token_type = keyword_token
         self.read_char()
+        if len(identifier) == 0:
+            raise ValueError("got empty string")
         return Token(token_type=token_type, literal=identifier)
 
     def read_string(self) -> Token:
@@ -64,9 +66,24 @@ class Lexer:
         return Token(token_type=token_type, literal=possible_operator)
 
     def next_token(self) -> Optional[Token]:
+        """
+        if self.current_character == r"\":
+            self.read_char()
+            return self.next_token()
+        """
         if self.current_character == ",":
             self.read_char()
             return Token(token_type=TokenType.COMMA, literal=",")
+        if self.current_character == "'":
+            self.read_char()
+            return self.next_token()
+        if self.current_character == ")":
+            self.read_char()
+            return Token(token_type=TokenType.RPAREN, literal=")")
+        if self.next_character == ")":
+            self.read_char()  # to not let the above one kick in
+            self.read_char()
+            return Token(token_type=TokenType.RPAREN, literal=")")
         if self.next_character == " ":
             self.read_char()
             return self.next_token()
@@ -75,8 +92,6 @@ class Lexer:
         if self.next_character == "'":
             self.read_char()
             return self.read_string()
-        if self.next_character.isdigit():
-            return self.read_integer()
         if self.next_character.isdigit():
             return self.read_integer()
         if (
@@ -89,8 +104,5 @@ class Lexer:
         if self.next_character == "(":
             self.read_char()
             return Token(token_type=TokenType.LPAREN, literal="(")
-        elif self.next_character == ")":
-            self.read_char()
-            return Token(token_type=TokenType.RPAREN, literal=")")
         else:
             return self.read_identifier()

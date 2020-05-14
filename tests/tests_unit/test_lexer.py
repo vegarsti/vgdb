@@ -4,7 +4,10 @@ from toydb.token import Token, TokenType
 
 class TestLexer:
     def test_lexer(self):
-        program = "SeLeCT WhErE INsERT inTo vaLues 'abc' 1, 2, 3 1234 = < > <= >= a_column_name another () FROM b != ;"
+        program = (
+            "SeLeCT WhErE INsERT inTo vaLues 'abc' 1, 2, 3 1234 = ('a', 'b', 1) < > <= "
+            ">= a_column_name another ( ) FROM b != ;"
+        )
         lexer = Lexer(program)
         assert lexer.next_token() == Token(token_type=TokenType.SELECT, literal="select")
         assert lexer.next_token() == Token(token_type=TokenType.WHERE, literal="where")
@@ -19,6 +22,13 @@ class TestLexer:
         assert lexer.next_token() == Token(token_type=TokenType.INT, literal=3)
         assert lexer.next_token() == Token(token_type=TokenType.INT, literal=1234)
         assert lexer.next_token() == Token(token_type=TokenType.EQUALS, literal="=")
+        assert lexer.next_token() == Token(token_type=TokenType.LPAREN, literal="(")
+        assert lexer.next_token() == Token(token_type=TokenType.STRING, literal="a")
+        assert lexer.next_token() == Token(token_type=TokenType.COMMA, literal=",")
+        assert lexer.next_token() == Token(token_type=TokenType.STRING, literal="b")
+        assert lexer.next_token() == Token(token_type=TokenType.COMMA, literal=",")
+        assert lexer.next_token() == Token(token_type=TokenType.INT, literal=1)
+        assert lexer.next_token() == Token(token_type=TokenType.RPAREN, literal=")")
         assert lexer.next_token() == Token(token_type=TokenType.LT, literal="<")
         assert lexer.next_token() == Token(token_type=TokenType.GT, literal=">")
         assert lexer.next_token() == Token(token_type=TokenType.LTEQ, literal="<=")
