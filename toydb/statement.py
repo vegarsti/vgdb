@@ -1,18 +1,9 @@
 from dataclasses import dataclass
-from enum import Enum
 from typing import List, Optional, Tuple, Type, Union
 
 from toydb.get_tables import get_tables
 from toydb.print_utils import print_selection
 from toydb.where import Where
-
-
-class Commands(Enum):
-    INSERT = "insert"
-    SELECT = "select"
-    DELETE = "delete"
-    EXIT = "q"
-    CREATE = "create"
 
 
 @dataclass
