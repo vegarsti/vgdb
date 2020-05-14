@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import List, Optional, Tuple, Type, Union
 
 from toydb.get_tables import get_tables
-from toydb.print_utils import print_selection
+from toydb.repl_utils import print_selection
 from toydb.where import Where
 
 

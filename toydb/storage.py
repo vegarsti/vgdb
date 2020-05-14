@@ -8,21 +8,23 @@ ENDIANNESS = "little"
 d: Dict[Type, str] = {str: "text", int: "int"}
 d_inv: Dict[str, Type] = {"text": str, "int": int}
 
+NULL_BYTE = b"\x00"
+
 
 def read_null_terminated_string(f: IO[bytes]) -> str:
     s = ""
     while True:
         new_byte = f.read(1)
-        if new_byte == b"\x00":
+        if new_byte == NULL_BYTE:
             break
         s += new_byte.decode("ascii")
     return s
 
 
-def write_null_terminated_string(f: IO[bytes], s: str) -> None:
+def write_string(f: IO[bytes], s: str) -> None:
     s_ascii = s.encode("ascii")
     f.write(s_ascii)
-    f.write(b"\x00")
+    f.write(NULL_BYTE)
 
 
 def write_int(f: IO[bytes], i: int) -> None:
@@ -64,8 +66,8 @@ class Storage:
         with self._file.open("wb") as f:
             write_tiny_int(f, len(self._spec))
             for column_name, column_type in self._columns.items():
-                write_null_terminated_string(f, column_name)
-                write_null_terminated_string(f, d[column_type])
+                write_string(f, column_name)
+                write_string(f, d[column_type])
 
     def _error_if_exists(self) -> None:
         try:
@@ -93,7 +95,7 @@ class Storage:
         with self._file.open("ba+") as f:
             for cell, typ in zip(row, self._columns.values()):
                 if typ == str:
-                    write_null_terminated_string(f, str(cell))
+                    write_string(f, str(cell))
                 elif typ == int:
                     write_int(f, int(cell))
                 else:
@@ -102,7 +104,7 @@ class Storage:
     def read_rows(self) -> Iterator[List[Union[int, str]]]:
         with self._file.open("rb") as f:
             f.read(self._header_bytes)
-            while f.peek(1) != b"":  # type: ignore
+            while len(f.peek(1)) > 0:  # type: ignore
                 row: List[Union[int, str]] = []
                 for typ in self._columns.values():
                     if typ == str:
