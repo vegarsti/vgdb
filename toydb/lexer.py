@@ -1,6 +1,6 @@
 from typing import Optional
 
-from toydb.token import Token, TokenType, keywords, operators
+from toydb.sql_token import Token, TokenType, keywords, operators
 
 
 class Lexer:
@@ -104,5 +104,8 @@ class Lexer:
         if self.next_character == "(":
             self.read_char()
             return Token(token_type=TokenType.LPAREN, literal="(")
+        if self.next_character == "*":
+            self.read_char()
+            return Token(token_type=TokenType.STAR, literal="*")
         else:
             return self.read_identifier()

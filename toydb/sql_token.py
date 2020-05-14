@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+import dataclasses
 from enum import Enum
 from typing import Union
 
@@ -26,6 +26,7 @@ class TokenType(Enum):
     RPAREN = ")"
     CREATE = "create"
     TABLE = "table"
+    STAR = "*"
 
 
 keywords = {
@@ -39,6 +40,7 @@ keywords = {
     "table": TokenType.TABLE,
     "text": TokenType.TEXT_TYPE,
     "int": TokenType.INT_TYPE,
+    "star": TokenType.STAR,
 }
 
 operators = {
@@ -51,7 +53,7 @@ operators = {
 }
 
 
-@dataclass
+@dataclasses.dataclass
 class Token:
     token_type: TokenType
     literal: Union[int, str]

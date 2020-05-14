@@ -1,14 +1,15 @@
 import sys
 from functools import partial
-from typing import Callable
+from typing import Callable, Optional, Union
 
 from blessed import Terminal
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
 
 from toydb.get_tables import get_tables
-from toydb.query_parser import parse_command
-from toydb.statement import CreateTable, Exit, Insert, Select, handle_command
+from toydb.lexer import Lexer
+from toydb.parser import Parser
+from toydb.statement import CreateTable, Insert, Select, handle_command
 from toydb.table import Table
 
 
@@ -19,12 +20,20 @@ def loop(prompt: Callable[[], str]) -> None:
             c = prompt()
         except (KeyboardInterrupt, EOFError):
             sys.exit(1)
-        command = parse_command(c.lower().strip())
-        if command is None:
-            print(f"invalid command: {c}")
-            continue
-        if isinstance(command, Exit):
+        user_input = c.lower().strip()
+        if user_input == "exit":
             break
+        lexer = Lexer(program=user_input)
+        parser = Parser(lexer=lexer)
+        command: Optional[Union[CreateTable, Insert, Select]] = None
+        try:
+            command = parser.parse()
+        except ValueError as e:
+            print(e)
+            continue
+        if command is None:
+            print("no command given")
+            continue
         if isinstance(command, CreateTable):
             table = tables.get(command.table_name)
             if table is not None:

@@ -35,11 +35,6 @@ class Select(Statement):
 
 
 @dataclass
-class Exit(Statement):
-    pass
-
-
-@dataclass
 class CreateTable(Statement):
     table_name: str
     columns: List[Tuple[str, Type]]
