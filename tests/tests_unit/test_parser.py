@@ -3,7 +3,7 @@ import pytest
 from toydb.ast import Program
 from toydb.lexer import Lexer
 from toydb.parser import Parser
-from toydb.statement import Insert, Select
+from toydb.statement import CreateTable, Insert, Select
 from toydb.where import Predicate, Where
 
 
@@ -38,6 +38,20 @@ class TestParser:
         ],
     )
     def test_parse_insert(self, statement, expected):
+        lexer = Lexer(program=statement)
+        parser = Parser(lexer=lexer)
+        program = parser.parse()
+        statements = [expected]
+        assert program == Program(statements=statements)
+
+    @pytest.mark.parametrize(
+        argnames=("statement", "expected"),
+        argvalues=[
+            # ("create table a (a text)", CreateTable(table_name="a", columns=[("a", str)])),
+            ("create table a (a text, b int)", CreateTable(table_name="a", columns=[("a", str), ("b", int)])),
+        ],
+    )
+    def test_parse_create_table(self, statement, expected):
         lexer = Lexer(program=statement)
         parser = Parser(lexer=lexer)
         program = parser.parse()

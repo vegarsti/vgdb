@@ -1,8 +1,8 @@
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Type, Union
 
 from toydb.ast import Program
 from toydb.lexer import Lexer
-from toydb.statement import Insert, Select
+from toydb.statement import CreateTable, Insert, Select
 from toydb.token import TokenType
 from toydb.where import Predicate, Where
 
@@ -75,7 +75,7 @@ class Parser:
             if self.current_token is None or not any(
                 self.current_token.token_type == type_ for type_ in (TokenType.STRING, TokenType.INT)
             ):
-                raise ValueError(f"expected string or int token, was {self.current_token}")
+                raise ValueError(f"expected string or int value token, was {self.current_token}")
             value = self.current_token.literal
             values.append(value)
             self.read_token()
@@ -106,9 +106,47 @@ class Parser:
         self.read_token()
         return Insert(values=values, table_name=table_name)
 
+    def parse_create_table_columns(self) -> List[Tuple[str, Type]]:
+        columns: List[Tuple[str, Type]] = []
+        done = False
+        if self.current_token is None or not self.current_token.token_type == TokenType.LPAREN:
+            raise ValueError(f"expected LPAREN token, was {self.current_token}")
+        self.read_token()
+        while not done:
+            if self.current_token is None or not self.current_token.token_type == TokenType.IDENTIFIER:
+                raise ValueError(f"expected column identifier token, was {self.current_token}")
+            column_name = str(self.current_token.literal)
+            self.read_token()
+            if self.current_token is None or not any(
+                self.current_token.token_type == type_ for type_ in (TokenType.TEXT_TYPE, TokenType.INT_TYPE)
+            ):
+                raise ValueError(f"expected INT or TEXT token, was {self.current_token}")
+            value = {"int": int, "text": str}[str(self.current_token.literal)]
+            columns.append((column_name, value))
+            self.read_token()
+            if self.current_token.token_type == TokenType.COMMA:
+                self.read_token()
+            else:
+                done = True
+        if self.current_token is None or not self.current_token.token_type == TokenType.RPAREN:
+            raise ValueError(f"expected RPAREN token, was {self.current_token}")
+        self.read_token()
+        return columns
+
+    def parse_create_table(self) -> CreateTable:
+        if self.current_token is None or not self.current_token.token_type == TokenType.TABLE:
+            raise ValueError(f"expected TABLE token, was {self.current_token}")
+        self.read_token()
+        if self.current_token is None or not self.current_token.token_type == TokenType.IDENTIFIER:
+            raise ValueError(f"expected table name identifier token, was {self.current_token}")
+        table_name = str(self.current_token.literal)
+        self.read_token()
+        columns = self.parse_create_table_columns()
+        return CreateTable(table_name=table_name, columns=columns)
+
     def parse(self) -> Program:
-        statements: List[Union[Select, Insert]] = []
-        statement: Union[Select, Insert]
+        statements: List[Union[Select, Insert, CreateTable]] = []
+        statement: Union[Select, Insert, CreateTable]
         if self.current_token is None:
             return Program(statements)
         if self.current_token.token_type == TokenType.SELECT:
@@ -117,6 +155,9 @@ class Parser:
         elif self.current_token.token_type == TokenType.INSERT:
             self.read_token()
             statement = self.parse_insert()
+        elif self.current_token.token_type == TokenType.CREATE:
+            self.read_token()
+            statement = self.parse_create_table()
         else:
             raise ValueError("Unsupported token type")
         statements.append(statement)

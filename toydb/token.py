@@ -4,8 +4,10 @@ from typing import Union
 
 
 class TokenType(Enum):
-    INT = "int"
+    INT = "integer"
     STRING = "string"
+    TEXT_TYPE = "text"
+    INT_TYPE = "int"
     SELECT = "select"
     WHERE = "where"
     INSERT = "insert"
@@ -22,6 +24,8 @@ class TokenType(Enum):
     COMMA = ","
     LPAREN = "("
     RPAREN = ")"
+    CREATE = "create"
+    TABLE = "table"
 
 
 keywords = {
@@ -31,6 +35,10 @@ keywords = {
     "into": TokenType.INTO,
     "values": TokenType.VALUES,
     "from": TokenType.FROM,
+    "create": TokenType.CREATE,
+    "table": TokenType.TABLE,
+    "text": TokenType.TEXT_TYPE,
+    "int": TokenType.INT_TYPE,
 }
 
 operators = {
