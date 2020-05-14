@@ -1,18 +1,9 @@
 from dataclasses import dataclass
-from enum import Enum
 from typing import List, Optional, Tuple, Type, Union
 
 from toydb.get_tables import get_tables
-from toydb.print_utils import print_selection
+from toydb.repl_utils import print_selection
 from toydb.where import Where
-
-
-class Commands(Enum):
-    INSERT = "insert"
-    SELECT = "select"
-    DELETE = "delete"
-    EXIT = "q"
-    CREATE = "create"
 
 
 @dataclass
@@ -32,11 +23,6 @@ class Select(Statement):
     table_name: str
     where: Optional[Where] = None
     limit: int = -1
-
-
-@dataclass
-class Exit(Statement):
-    pass
 
 
 @dataclass

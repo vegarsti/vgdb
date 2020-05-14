@@ -70,7 +70,7 @@ class Table:
                 i = self.column_name_to_index(where.column)
                 assert i is not None
                 where_value_typed = list(self._columns.values())[i](where.value)
-                row_matches = {Predicate.EQUAL: lambda a, b: a == b}[where.predicate](row[i], where_value_typed)
+                row_matches = {Predicate.EQUALS: lambda a, b: a == b}[where.predicate](row[i], where_value_typed)
                 if row_matches:
                     to_return = [row[i] for i in columns]
                     count += 1
