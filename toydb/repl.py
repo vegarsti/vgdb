@@ -6,15 +6,16 @@ from blessed import Terminal
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
 
+from toydb.evaluator import Evaluator
 from toydb.get_tables import get_tables
 from toydb.lexer import Lexer
 from toydb.parser import Parser
-from toydb.statement import CreateTable, Insert, Select, handle_command
-from toydb.table import Table
+from toydb.statement import CreateTable, Insert, Select
 
 
 def loop(prompt: Callable[[], str]) -> None:
     tables = get_tables()
+    evaluator = Evaluator(tables=tables)
     while True:
         try:
             c = prompt()
@@ -34,20 +35,10 @@ def loop(prompt: Callable[[], str]) -> None:
         if command is None:
             print("no command given")
             continue
-        if isinstance(command, CreateTable):
-            table = tables.get(command.table_name)
-            if table is not None:
-                print(command.table_name)
-                print(f"table {table.name} already exists with schema {table._columns}")
-            else:
-                table = Table(name=command.table_name, columns=command.columns)
-                table.persist()
-                print(f"created table {table.name} with schema {table.columns}")
-        else:
-            if isinstance(command, Select) or isinstance(command, Insert):
-                handle_command(command=command)
-            else:
-                print("huh?")
+        try:
+            evaluator.handle_command(command)
+        except ValueError as e:
+            print(str(e))
 
 
 def main() -> None:

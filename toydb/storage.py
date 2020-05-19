@@ -74,7 +74,7 @@ class Storage:
             with self._file.open("bx"):
                 pass
         except FileExistsError:
-            raise ValueError
+            raise ValueError("File exists")
 
     def delete(self) -> None:
         self._file.unlink()
