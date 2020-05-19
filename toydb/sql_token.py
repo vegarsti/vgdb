@@ -27,6 +27,7 @@ class TokenType(Enum):
     CREATE = "create"
     TABLE = "table"
     STAR = "*"
+    AND = "and"
 
 
 keywords = {
@@ -41,6 +42,7 @@ keywords = {
     "text": TokenType.TEXT_TYPE,
     "int": TokenType.INT_TYPE,
     "star": TokenType.STAR,
+    "and": TokenType.AND,
 }
 
 operators = {

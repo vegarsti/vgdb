@@ -39,7 +39,7 @@ class TestTable:
     def test_select_where(self, table):
         table.insert(["a", 1])
         table.insert(["b", 2])
-        assert list(table.select(columns=[0, 1], where=Where(column="a", predicate=Predicate.EQUAL, value=1))) == [
+        assert list(table.select(columns=[0, 1], where=[Where(column="a", predicate=Predicate.EQUAL, value=1)])) == [
             ["a", 1]
         ]
-        assert list(table.select(columns=[0, 1], where=Where(column="a", predicate=Predicate.EQUAL, value=3))) == []
+        assert list(table.select(columns=[0, 1], where=[Where(column="a", predicate=Predicate.EQUAL, value=3)])) == []

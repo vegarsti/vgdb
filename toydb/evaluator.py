@@ -49,10 +49,11 @@ class Evaluator:
             raise ValueError(
                 f"incorrect selection of columns {', '.join(command.columns)}: table has schema {table.columns}"
             )
-        if command.where is not None:
-            i = table.column_name_to_index(command.where.column)
-            if i is None:
-                raise ValueError(f"incorrect column {command.where.column}, table has schema {table.columns}")
+        if len(command.where) > 0:
+            for w in command.where:
+                i = table.column_name_to_index(w.column)
+                if i is None:
+                    raise ValueError(f"incorrect column {w.column}, table has schema {table.columns}")
         table_ = list(table.select(columns=table_indices, where=command.where, limit=command.limit))
         if table_ is not None:
             print_selection(table_)

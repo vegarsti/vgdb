@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import List, Optional, Tuple, Type, Union
+from dataclasses import dataclass, field
+from typing import List, Tuple, Type, Union
 
 from toydb.where import Where
 
@@ -19,7 +19,7 @@ class Insert(Statement):
 class Select(Statement):
     columns: List[str]
     table_name: str
-    where: Optional[Where] = None
+    where: List[Where] = field(default_factory=lambda: [])
     limit: int = -1
 
 

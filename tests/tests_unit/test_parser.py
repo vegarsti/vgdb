@@ -10,36 +10,49 @@ class TestParser:
     @pytest.mark.parametrize(
         argnames=("statement", "expected"),
         argvalues=[
-            ("select a from b", Select(columns=["a"], table_name="b")),
-            ("select a, b from b", Select(columns=["a", "b"], table_name="b")),
-            ("select * from b", Select(columns=["all"], table_name="b")),
+            ("select a from b", Select(columns=["a"], table_name="b", where=[])),
+            ("select a, b from b", Select(columns=["a", "b"], table_name="b", where=[])),
+            ("select * from b", Select(columns=["all"], table_name="b", where=[])),
             (
                 "select a from b where a = 'a'",
-                Select(columns=["a"], table_name="b", where=Where(column="a", predicate=Predicate.EQUALS, value="a")),
+                Select(columns=["a"], table_name="b", where=[Where(column="a", predicate=Predicate.EQUALS, value="a")]),
             ),
             (
                 "select a from b where a = 1",
-                Select(columns=["a"], table_name="b", where=Where(column="a", predicate=Predicate.EQUALS, value=1)),
+                Select(columns=["a"], table_name="b", where=[Where(column="a", predicate=Predicate.EQUALS, value=1)]),
             ),
             (
                 "select a from b where a < 1",
-                Select(columns=["a"], table_name="b", where=Where(column="a", predicate=Predicate.LT, value=1)),
+                Select(columns=["a"], table_name="b", where=[Where(column="a", predicate=Predicate.LT, value=1)]),
             ),
             (
                 "select a from b where a > 1",
-                Select(columns=["a"], table_name="b", where=Where(column="a", predicate=Predicate.GT, value=1)),
+                Select(columns=["a"], table_name="b", where=[Where(column="a", predicate=Predicate.GT, value=1)]),
             ),
             (
                 "select a from b where a != 1",
-                Select(columns=["a"], table_name="b", where=Where(column="a", predicate=Predicate.NOT_EQUALS, value=1)),
+                Select(
+                    columns=["a"], table_name="b", where=[Where(column="a", predicate=Predicate.NOT_EQUALS, value=1)]
+                ),
             ),
             (
                 "select a from b where a <= 1",
-                Select(columns=["a"], table_name="b", where=Where(column="a", predicate=Predicate.LTEQ, value=1)),
+                Select(columns=["a"], table_name="b", where=[Where(column="a", predicate=Predicate.LTEQ, value=1)]),
             ),
             (
                 "select a from b where a >= 1",
-                Select(columns=["a"], table_name="b", where=Where(column="a", predicate=Predicate.GTEQ, value=1)),
+                Select(columns=["a"], table_name="b", where=[Where(column="a", predicate=Predicate.GTEQ, value=1)]),
+            ),
+            (
+                "select a from b where a < 1 and a > 0",
+                Select(
+                    columns=["a"],
+                    table_name="b",
+                    where=[
+                        Where(column="a", predicate=Predicate.LT, value=1),
+                        Where(column="a", predicate=Predicate.GT, value=0),
+                    ],
+                ),
             ),
         ],
     )
@@ -47,7 +60,7 @@ class TestParser:
         lexer = Lexer(program=statement)
         parser = Parser(lexer=lexer)
         statement = parser.parse()
-        assert expected == statement
+        assert statement == expected
 
     @pytest.mark.parametrize(
         argnames=("statement", "expected"),
@@ -60,7 +73,7 @@ class TestParser:
         lexer = Lexer(program=statement)
         parser = Parser(lexer=lexer)
         statement = parser.parse()
-        assert expected == statement
+        assert statement == expected
 
     @pytest.mark.parametrize(
         argnames=("statement", "expected"),
@@ -73,4 +86,4 @@ class TestParser:
         lexer = Lexer(program=statement)
         parser = Parser(lexer=lexer)
         statement = parser.parse()
-        assert expected == statement
+        assert statement == expected

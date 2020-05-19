@@ -1,3 +1,4 @@
+from dataclasses import field
 from typing import Dict, Iterator, List, Optional, Sequence, Tuple, Type, Union
 
 from toydb.storage import Storage
@@ -56,7 +57,7 @@ class Table:
         return column_indices_to_select
 
     def select(
-        self, columns: List[int], where: Optional[Where] = None, limit: int = -1
+        self, columns: List[int], where: List[Where] = field(default_factory=lambda: []), limit: int = -1
     ) -> Iterator[List[Union[str, int]]]:
         predicate_map = {
             Predicate.EQUALS: lambda a, b: a == b,
@@ -70,15 +71,17 @@ class Table:
         for row in self.all_rows():
             if count == limit:
                 return
-            if where is None:
+            if len(where) == 0:
                 to_return = [row[i] for i in columns]
                 count += 1
                 yield to_return
             else:
-                i = self.column_name_to_index(where.column)
-                assert i is not None
-                where_value_typed = list(self._columns.values())[i](where.value)
-                row_matches = predicate_map[where.predicate](row[i], where_value_typed)
+                row_matches = True
+                for w in where:
+                    i = self.column_name_to_index(w.column)
+                    assert i is not None
+                    where_value_typed = list(self._columns.values())[i](w.value)
+                    row_matches = row_matches and predicate_map[w.predicate](row[i], where_value_typed)
                 if row_matches:
                     to_return = [row[i] for i in columns]
                     count += 1

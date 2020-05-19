@@ -1,4 +1,4 @@
-from typing import List, Optional, Tuple, Type, Union
+from typing import List, Tuple, Type, Union
 
 from toydb.lexer import Lexer
 from toydb.sql_token import TokenType
@@ -15,6 +15,19 @@ class Parser:
     def read_token(self) -> None:
         self.current_token = self.next_token
         self.next_token = self.lexer.next_token()
+
+    def parse_full_where(self) -> List[Where]:
+        where: List[Where] = []
+        done = False
+        if self.current_token is not None and self.current_token.token_type == TokenType.WHERE:
+            self.read_token()
+        while not done:
+            where.append(self.parse_where())
+            if self.current_token is not None and self.current_token.token_type == TokenType.AND:
+                self.read_token()
+            else:
+                done = True
+        return where
 
     def parse_where(self) -> Where:
         if self.current_token is None or not self.current_token.token_type == TokenType.IDENTIFIER:
@@ -71,10 +84,11 @@ class Parser:
             raise ValueError(f"expected table identifier token, was {self.current_token}")
         table_name = str(self.current_token.literal)
         self.read_token()
-        where: Optional[Where] = None
+        where: List[Where] = []
         if self.current_token is not None and self.current_token.token_type == TokenType.WHERE:
-            self.read_token()
-            where = self.parse_where()
+            where = self.parse_full_where()
+        else:
+            where = []
         return Select(columns=columns, table_name=table_name, where=where)
 
     def parse_insert_values(self) -> List[Union[str, int]]:
