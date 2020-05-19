@@ -5,7 +5,7 @@ from toydb.sql_token import Token, TokenType
 class TestLexer:
     def test_lexer(self):
         program = (
-            "SeLeCT WhErE INsERT inTo vaLues 'abc' 1, 2, 3 1234 = ('a', 'b', 1) < > <= "
+            "SeLeCT WhErE INsERT inTo vaLues 'abc' 'a b' 1, 2, 3 1234 = ('a', 'b', 1) < > <= "
             ">= a_column_name another ( ) FROM b != CREATE TABLE TEXT INT * ;"
         )
         lexer = Lexer(program)
@@ -15,6 +15,7 @@ class TestLexer:
         assert lexer.next_token() == Token(token_type=TokenType.INTO, literal="into")
         assert lexer.next_token() == Token(token_type=TokenType.VALUES, literal="values")
         assert lexer.next_token() == Token(token_type=TokenType.STRING, literal="abc")
+        assert lexer.next_token() == Token(token_type=TokenType.STRING, literal="a b")
         assert lexer.next_token() == Token(token_type=TokenType.INT, literal=1)
         assert lexer.next_token() == Token(token_type=TokenType.COMMA, literal=",")
         assert lexer.next_token() == Token(token_type=TokenType.INT, literal=2)
