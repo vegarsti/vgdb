@@ -2,7 +2,7 @@ from typing import List, Tuple, Type, Union
 
 from toydb.lexer import Lexer
 from toydb.sql_token import TokenType
-from toydb.statement import CreateTable, Insert, Select
+from toydb.statement import Conjunction, CreateTable, Insert, Select, WhereStatement
 from toydb.where import Predicate, Where
 
 
@@ -16,18 +16,23 @@ class Parser:
         self.current_token = self.next_token
         self.next_token = self.lexer.next_token()
 
-    def parse_full_where(self) -> List[Where]:
+    def parse_full_where(self) -> WhereStatement:
         where: List[Where] = []
+        conjunctions: List[Conjunction] = []
+        conjunction_map = {TokenType.OR: Conjunction.OR, TokenType.AND: Conjunction.AND}
         done = False
         if self.current_token is not None and self.current_token.token_type == TokenType.WHERE:
             self.read_token()
         while not done:
             where.append(self.parse_where())
-            if self.current_token is not None and self.current_token.token_type == TokenType.AND:
+            if self.current_token is not None and (
+                self.current_token.token_type == TokenType.AND or self.current_token.token_type == TokenType.OR
+            ):
+                conjunctions.append(conjunction_map[self.current_token.token_type])
                 self.read_token()
             else:
                 done = True
-        return where
+        return WhereStatement(conditions=where, conjunctions=conjunctions)
 
     def parse_where(self) -> Where:
         if self.current_token is None or not self.current_token.token_type == TokenType.IDENTIFIER:
@@ -84,11 +89,11 @@ class Parser:
             raise ValueError(f"expected table identifier token, was {self.current_token}")
         table_name = str(self.current_token.literal)
         self.read_token()
-        where: List[Where] = []
+        where: WhereStatement
         if self.current_token is not None and self.current_token.token_type == TokenType.WHERE:
             where = self.parse_full_where()
         else:
-            where = []
+            where = WhereStatement()
         return Select(columns=columns, table_name=table_name, where=where)
 
     def parse_insert_values(self) -> List[Union[str, int]]:

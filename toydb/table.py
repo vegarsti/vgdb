@@ -1,8 +1,8 @@
-from dataclasses import field
 from typing import Dict, Iterator, List, Optional, Sequence, Tuple, Type, Union
 
+from toydb.statement import Conjunction, WhereStatement
 from toydb.storage import Storage
-from toydb.where import Predicate, Where
+from toydb.where import Predicate
 
 d: Dict[Type, str] = {str: "text", int: "int"}
 d_inv: Dict[str, Type] = {"text": str, "int": int}
@@ -56,9 +56,7 @@ class Table:
                 column_indices_to_select.append(j)
         return column_indices_to_select
 
-    def select(
-        self, columns: List[int], where: List[Where] = field(default_factory=lambda: []), limit: int = -1
-    ) -> Iterator[List[Union[str, int]]]:
+    def select(self, columns: List[int], where: WhereStatement, limit: int = -1) -> Iterator[List[Union[str, int]]]:
         predicate_map = {
             Predicate.EQUALS: lambda a, b: a == b,
             Predicate.NOT_EQUALS: lambda a, b: a != b,
@@ -71,18 +69,22 @@ class Table:
         for row in self.all_rows():
             if count == limit:
                 return
-            if len(where) == 0:
+            if len(where.conditions) == 0:
                 to_return = [row[i] for i in columns]
                 count += 1
                 yield to_return
             else:
-                row_matches = True
-                for w in where:
+                row_matches = [] * len(where.conditions)
+                for w in where.conditions:
                     i = self.column_name_to_index(w.column)
                     assert i is not None
                     where_value_typed = list(self._columns.values())[i](w.value)
-                    row_matches = row_matches and predicate_map[w.predicate](row[i], where_value_typed)
-                if row_matches:
+                    row_matches.append(predicate_map[w.predicate](row[i], where_value_typed))
+                op = all
+                if where.conjunctions[0] == Conjunction.OR:
+                    op = any
+                should_yield = op(row_matches)
+                if should_yield:
                     to_return = [row[i] for i in columns]
                     count += 1
                     yield to_return

@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import List, Tuple, Type, Union
 
 from toydb.where import Where
@@ -15,11 +16,22 @@ class Insert(Statement):
     table_name: str
 
 
+class Conjunction(Enum):
+    AND = "and"
+    OR = "or"
+
+
+@dataclass
+class WhereStatement:
+    conditions: List[Where] = field(default_factory=lambda: [])
+    conjunctions: List[Conjunction] = field(default_factory=lambda: [])
+
+
 @dataclass
 class Select(Statement):
     columns: List[str]
     table_name: str
-    where: List[Where] = field(default_factory=lambda: [])
+    where: WhereStatement
     limit: int = -1
 
 
