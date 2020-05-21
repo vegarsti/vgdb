@@ -32,6 +32,7 @@ class TokenType(Enum):
     LIMIT = "limit"
     ORDER = "order"
     BY = "by"
+    DESC = "desc"
 
 
 keywords = {
@@ -51,6 +52,7 @@ keywords = {
     "limit": TokenType.LIMIT,
     "order": TokenType.ORDER,
     "by": TokenType.BY,
+    "desc": TokenType.DESC,
 }
 
 operators = {

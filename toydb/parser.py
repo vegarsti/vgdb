@@ -91,18 +91,24 @@ class Parser:
         if self.current_token is None or not self.current_token.token_type == TokenType.BY:
             raise ValueError(f"expected BY token, was {self.current_token}")
         self.read_token()
-        columns = []
+        columns: List[str] = []
+        descending: List[bool] = []
         done = False
         while not done:
             if self.current_token is None or not self.current_token.token_type == TokenType.IDENTIFIER:
                 raise ValueError(f"expected column identifier token, was {self.current_token}")
             columns.append(str(self.current_token.literal))
             self.read_token()
+            if self.current_token is not None and self.current_token.token_type == TokenType.DESC:
+                self.read_token()
+                descending.append(True)
+            else:
+                descending.append(False)
             if self.current_token is not None and self.current_token.token_type == TokenType.COMMA:
                 self.read_token()
             else:
                 done = True
-        return OrderBy(columns=columns)
+        return OrderBy(columns=columns, descending=descending)
 
     def parse_select(self) -> Select:
         columns = self.parse_select_column()

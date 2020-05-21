@@ -30,7 +30,7 @@ class WhereStatement:
 @dataclass
 class OrderBy:
     columns: List[str]
-    descending: bool = False
+    descending: List[bool]
 
 
 @dataclass

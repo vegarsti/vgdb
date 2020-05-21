@@ -16,11 +16,43 @@ class TestParser:
             ("select * from b limit 1", Select(columns=["all"], table_name="b", where=None, limit=1)),
             (
                 "select * from b limit 1 order by b",
-                Select(columns=["all"], table_name="b", where=None, limit=1, order_by=OrderBy(columns=["b"])),
+                Select(
+                    columns=["all"],
+                    table_name="b",
+                    where=None,
+                    limit=1,
+                    order_by=OrderBy(columns=["b"], descending=[False]),
+                ),
+            ),
+            (
+                "select * from b limit 1 order by b desc",
+                Select(
+                    columns=["all"],
+                    table_name="b",
+                    where=None,
+                    limit=1,
+                    order_by=OrderBy(columns=["b"], descending=[True]),
+                ),
             ),
             (
                 "select * from b limit 1 order by b, a",
-                Select(columns=["all"], table_name="b", where=None, limit=1, order_by=OrderBy(columns=["b", "a"])),
+                Select(
+                    columns=["all"],
+                    table_name="b",
+                    where=None,
+                    limit=1,
+                    order_by=OrderBy(columns=["b", "a"], descending=[False, False]),
+                ),
+            ),
+            (
+                "select * from b limit 1 order by b, a desc",
+                Select(
+                    columns=["all"],
+                    table_name="b",
+                    where=None,
+                    limit=1,
+                    order_by=OrderBy(columns=["b", "a"], descending=[False, True]),
+                ),
             ),
             (
                 "select a from b where a = 'a'",
