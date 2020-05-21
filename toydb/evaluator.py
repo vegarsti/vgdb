@@ -49,8 +49,8 @@ class Evaluator:
             raise ValueError(
                 f"incorrect selection of columns {', '.join(command.columns)}: table has schema {table.columns}"
             )
-        if len(command.where) > 0:
-            for w in command.where:
+        if command.where is not None and len(command.where.conditions) > 0:
+            for w in command.where.conditions:
                 i = table.column_name_to_index(w.column)
                 if i is None:
                     raise ValueError(f"incorrect column {w.column}, table has schema {table.columns}")

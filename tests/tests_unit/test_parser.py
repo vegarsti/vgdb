@@ -10,9 +10,9 @@ class TestParser:
     @pytest.mark.parametrize(
         argnames=("statement", "expected"),
         argvalues=[
-            ("select a from b", Select(columns=["a"], table_name="b", where=WhereStatement())),
-            ("select a, b from b", Select(columns=["a", "b"], table_name="b", where=WhereStatement())),
-            ("select * from b", Select(columns=["all"], table_name="b", where=WhereStatement())),
+            ("select a from b", Select(columns=["a"], table_name="b", where=None)),
+            ("select a, b from b", Select(columns=["a", "b"], table_name="b", where=None)),
+            ("select * from b", Select(columns=["all"], table_name="b", where=None)),
             (
                 "select a from b where a = 'a'",
                 Select(
@@ -94,6 +94,21 @@ class TestParser:
                             Where(column="a", predicate=Predicate.GT, value=0),
                         ],
                         conjunctions=[Conjunction.AND],
+                    ),
+                ),
+            ),
+            (
+                "select a from b where a < 1 and a > 0 or a = 1",
+                Select(
+                    columns=["a"],
+                    table_name="b",
+                    where=WhereStatement(
+                        conditions=[
+                            Where(column="a", predicate=Predicate.LT, value=1),
+                            Where(column="a", predicate=Predicate.GT, value=0),
+                            Where(column="a", predicate=Predicate.EQUALS, value=1),
+                        ],
+                        conjunctions=[Conjunction.AND, Conjunction.OR],
                     ),
                 ),
             ),

@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import List, Tuple, Type, Union
+from typing import List, Optional, Tuple, Type, Union
 
 from toydb.where import Where
 
@@ -31,7 +31,7 @@ class WhereStatement:
 class Select(Statement):
     columns: List[str]
     table_name: str
-    where: WhereStatement
+    where: Optional[WhereStatement] = None
     limit: int = -1
 
 

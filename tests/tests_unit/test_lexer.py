@@ -45,8 +45,8 @@ class TestLexer:
         assert lexer.next_token() == Token(token_type=TokenType.TABLE, literal="table")
         assert lexer.next_token() == Token(token_type=TokenType.TEXT_TYPE, literal="text")
         assert lexer.next_token() == Token(token_type=TokenType.INT_TYPE, literal="int")
+        assert lexer.next_token() == Token(token_type=TokenType.STAR, literal="*")
         assert lexer.next_token() == Token(token_type=TokenType.AND, literal="and")
         assert lexer.next_token() == Token(token_type=TokenType.OR, literal="or")
-        assert lexer.next_token() == Token(token_type=TokenType.STAR, literal="*")
         assert lexer.next_token() is None
         assert lexer.next_token() is None

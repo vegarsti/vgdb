@@ -1,5 +1,6 @@
 import pytest
 
+from toydb.statement import WhereStatement
 from toydb.table import Table
 from toydb.where import Predicate, Where
 
@@ -39,7 +40,13 @@ class TestTable:
     def test_select_where(self, table):
         table.insert(["a", 1])
         table.insert(["b", 2])
-        assert list(table.select(columns=[0, 1], where=[Where(column="a", predicate=Predicate.EQUAL, value=1)])) == [
-            ["a", 1]
-        ]
-        assert list(table.select(columns=[0, 1], where=[Where(column="a", predicate=Predicate.EQUAL, value=3)])) == []
+        result = table.select(
+            columns=[0, 1],
+            where=WhereStatement(conditions=[Where(column="a", predicate=Predicate.EQUALS, value=1)], conjunctions=[]),
+        )
+        assert list(result) == [["a", 1]]
+        result = table.select(
+            columns=[0, 1],
+            where=WhereStatement(conditions=[Where(column="a", predicate=Predicate.EQUALS, value=3)], conjunctions=[]),
+        )
+        assert list(result) == []

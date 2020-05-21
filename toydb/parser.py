@@ -1,4 +1,4 @@
-from typing import List, Tuple, Type, Union
+from typing import List, Optional, Tuple, Type, Union
 
 from toydb.lexer import Lexer
 from toydb.sql_token import TokenType
@@ -89,11 +89,9 @@ class Parser:
             raise ValueError(f"expected table identifier token, was {self.current_token}")
         table_name = str(self.current_token.literal)
         self.read_token()
-        where: WhereStatement
+        where: Optional[WhereStatement] = None
         if self.current_token is not None and self.current_token.token_type == TokenType.WHERE:
             where = self.parse_full_where()
-        else:
-            where = WhereStatement()
         return Select(columns=columns, table_name=table_name, where=where)
 
     def parse_insert_values(self) -> List[Union[str, int]]:
@@ -185,4 +183,4 @@ class Parser:
             self.read_token()
             return self.parse_create_table()
         else:
-            raise ValueError("Unsupported token type")
+            raise ValueError(f"Statement beginning with token type {self.current_token} not supported")
