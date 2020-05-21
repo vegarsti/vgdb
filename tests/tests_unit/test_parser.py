@@ -13,6 +13,7 @@ class TestParser:
             ("select a from b", Select(columns=["a"], table_name="b", where=None)),
             ("select a, b from b", Select(columns=["a", "b"], table_name="b", where=None)),
             ("select * from b", Select(columns=["all"], table_name="b", where=None)),
+            ("select * from b limit 1", Select(columns=["all"], table_name="b", where=None, limit=1)),
             (
                 "select a from b where a = 'a'",
                 Select(
@@ -124,6 +125,21 @@ class TestParser:
                         ],
                         conjunctions=[Conjunction.OR],
                     ),
+                ),
+            ),
+            (
+                "select a from b where a < 1 or a > 0 limit 2",
+                Select(
+                    columns=["a"],
+                    table_name="b",
+                    where=WhereStatement(
+                        conditions=[
+                            Where(column="a", predicate=Predicate.LT, value=1),
+                            Where(column="a", predicate=Predicate.GT, value=0),
+                        ],
+                        conjunctions=[Conjunction.OR],
+                    ),
+                    limit=2,
                 ),
             ),
         ],

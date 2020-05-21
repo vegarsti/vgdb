@@ -80,6 +80,13 @@ class Parser:
                 done = True
         return columns
 
+    def parse_limit(self) -> int:
+        if self.current_token is None or not self.current_token.token_type == TokenType.INT:
+            raise ValueError("expected INT token")
+        limit = int(self.current_token.literal)
+        self.read_token()
+        return limit
+
     def parse_select(self) -> Select:
         columns = self.parse_select_column()
         if self.current_token is None or not self.current_token.token_type == TokenType.FROM:
@@ -92,7 +99,11 @@ class Parser:
         where: Optional[WhereStatement] = None
         if self.current_token is not None and self.current_token.token_type == TokenType.WHERE:
             where = self.parse_full_where()
-        return Select(columns=columns, table_name=table_name, where=where)
+        limit: int = -1
+        if self.current_token is not None and self.current_token.token_type == TokenType.LIMIT:
+            self.read_token()
+            limit = self.parse_limit()
+        return Select(columns=columns, table_name=table_name, where=where, limit=limit)
 
     def parse_insert_values(self) -> List[Union[str, int]]:
         values = []
