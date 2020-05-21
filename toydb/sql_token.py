@@ -30,6 +30,8 @@ class TokenType(Enum):
     AND = "and"
     OR = "or"
     LIMIT = "limit"
+    ORDER = "order"
+    BY = "by"
 
 
 keywords = {
@@ -47,6 +49,8 @@ keywords = {
     "and": TokenType.AND,
     "or": TokenType.OR,
     "limit": TokenType.LIMIT,
+    "order": TokenType.ORDER,
+    "by": TokenType.BY,
 }
 
 operators = {

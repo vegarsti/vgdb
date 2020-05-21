@@ -55,5 +55,7 @@ class Evaluator:
                 if i is None:
                     raise ValueError(f"incorrect column {w.column}, table has schema {table.columns}")
         table_ = list(table.select(columns=table_indices, where=command.where, limit=command.limit))
+        if command.order_by is not None:
+            pass
         if table_ is not None:
             print_selection(table_)
