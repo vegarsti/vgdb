@@ -29,6 +29,7 @@ class TokenType(Enum):
     STAR = "*"
     AND = "and"
     OR = "or"
+    LIMIT = "limit"
 
 
 keywords = {
@@ -45,6 +46,7 @@ keywords = {
     "star": TokenType.STAR,
     "and": TokenType.AND,
     "or": TokenType.OR,
+    "limit": TokenType.LIMIT,
 }
 
 operators = {
