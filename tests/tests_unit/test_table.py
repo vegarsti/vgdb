@@ -1,7 +1,9 @@
+from operator import and_, or_
+
 import pytest
 
 from toydb.statement import WhereStatement
-from toydb.table import Table
+from toydb.table import Table, reduce_booleans_using_conjunctions
 from toydb.where import Predicate, Where
 
 
@@ -50,3 +52,8 @@ class TestTable:
             where=WhereStatement(conditions=[Where(column="a", predicate=Predicate.EQUALS, value=3)], conjunctions=[]),
         )
         assert list(result) == []
+
+    def test_reduce(self):
+        assert reduce_booleans_using_conjunctions(conditions=[True, False], conjunctions=[and_]) is False
+        assert reduce_booleans_using_conjunctions(conditions=[True, False], conjunctions=[or_]) is True
+        assert reduce_booleans_using_conjunctions(conditions=[False, False, True], conjunctions=[and_, or_]) is True

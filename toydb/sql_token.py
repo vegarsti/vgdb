@@ -1,4 +1,4 @@
-import dataclasses
+from dataclasses import dataclass
 from enum import Enum
 from typing import Union
 
@@ -59,7 +59,7 @@ operators = {
 }
 
 
-@dataclasses.dataclass
+@dataclass
 class Token:
     token_type: TokenType
     literal: Union[int, str]

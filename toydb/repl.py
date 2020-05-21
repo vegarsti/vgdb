@@ -14,14 +14,13 @@ from toydb.statement import CreateTable, Insert, Select
 
 
 def loop(prompt: Callable[[], str]) -> None:
-    tables = get_tables()
-    evaluator = Evaluator(tables=tables)
     while True:
+        tables = get_tables()
+        evaluator = Evaluator(tables=tables)
         try:
-            c = prompt()
+            user_input = prompt()
         except (KeyboardInterrupt, EOFError):
             sys.exit(1)
-        user_input = c.lower().strip()
         if user_input == "exit":
             break
         lexer = Lexer(program=user_input)
@@ -38,7 +37,7 @@ def loop(prompt: Callable[[], str]) -> None:
         try:
             evaluator.handle_command(command)
         except ValueError as e:
-            print(str(e))
+            print(e)
 
 
 def main() -> None:
@@ -46,7 +45,7 @@ def main() -> None:
     message = [("class:prompt", "toydb> ")]
     session = PromptSession(style=style)
     toydb_prompt = partial(session.prompt, message)
-    fullscreen = False
+    fullscreen = len(sys.argv) > 1 and sys.argv[1] == "f"
     if fullscreen:
         term = Terminal()
         with term.fullscreen(), term.location(0, 0):
