@@ -66,11 +66,6 @@ class Lexer:
         return Token(token_type=token_type, literal=possible_operator)
 
     def next_token(self) -> Optional[Token]:
-        """
-        if self.current_character == r"\":
-            self.read_char()
-            return self.next_token()
-        """
         if self.current_character == ",":
             self.read_char()
             return Token(token_type=TokenType.COMMA, literal=",")

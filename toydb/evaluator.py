@@ -47,13 +47,17 @@ class Evaluator:
         table_indices = table.column_indices_from_names(command.columns)
         if table_indices is None:
             raise ValueError(
-                f"incorrect selection of columns {', '.join(command.columns)}: table has schema {table.columns}"
+                f"incorrect columns {', '.join(command.columns)} in SELECT: table has schema {table.columns}"
             )
-        if command.where is not None and len(command.where.conditions) > 0:
-            for w in command.where.conditions:
-                i = table.column_name_to_index(w.column)
-                if i is None:
-                    raise ValueError(f"incorrect column {w.column}, table has schema {table.columns}")
-        table_ = list(table.select(columns=table_indices, where=command.where, limit=command.limit))
-        if table_ is not None:
-            print_selection(table_)
+        rows = table.all_rows()
+        if command.where is not None:
+            rows = table.where(rows=rows, where=command.where)
+        if command.order_by is not None:
+            rows = table.order_by(rows=rows, order_by=command.order_by)
+        if command.limit is not None:
+            rows = table.limit(rows=rows, limit=command.limit)
+        to_return = []
+        for row in rows:
+            row_subset = [row[i] for i in table_indices]
+            to_return.append(row_subset)
+        print_selection(to_return)

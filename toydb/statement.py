@@ -28,11 +28,18 @@ class WhereStatement:
 
 
 @dataclass
+class OrderBy:
+    columns: List[str]
+    descending: List[bool]
+
+
+@dataclass
 class Select(Statement):
     columns: List[str]
     table_name: str
     where: Optional[WhereStatement] = None
-    limit: int = -1
+    limit: Optional[int] = None
+    order_by: Optional[OrderBy] = None
 
 
 @dataclass

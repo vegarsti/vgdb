@@ -6,7 +6,7 @@ class TestLexer:
     def test_lexer(self):
         program = (
             "SeLeCT WhErE INsERT inTo vaLues 'abc' 'a b' 1, 2, 3 1234 = ('a', 'b', 1) < > <= "
-            ">= a_column_name another ( ) FROM b != CREATE TABLE TEXT INT * and or limit ;"
+            ">= a_column_name another ( ) FROM b != CREATE TABLE TEXT INT * and DESC or limit ORDER BY ;"
         )
         lexer = Lexer(program)
         assert lexer.next_token() == Token(token_type=TokenType.SELECT, literal="select")
@@ -47,7 +47,10 @@ class TestLexer:
         assert lexer.next_token() == Token(token_type=TokenType.INT_TYPE, literal="int")
         assert lexer.next_token() == Token(token_type=TokenType.STAR, literal="*")
         assert lexer.next_token() == Token(token_type=TokenType.AND, literal="and")
+        assert lexer.next_token() == Token(token_type=TokenType.DESC, literal="desc")
         assert lexer.next_token() == Token(token_type=TokenType.OR, literal="or")
         assert lexer.next_token() == Token(token_type=TokenType.LIMIT, literal="limit")
+        assert lexer.next_token() == Token(token_type=TokenType.ORDER, literal="order")
+        assert lexer.next_token() == Token(token_type=TokenType.BY, literal="by")
         assert lexer.next_token() is None
         assert lexer.next_token() is None

@@ -1,4 +1,4 @@
-import dataclasses
+from dataclasses import dataclass
 from enum import Enum
 from typing import Union
 
@@ -30,6 +30,9 @@ class TokenType(Enum):
     AND = "and"
     OR = "or"
     LIMIT = "limit"
+    ORDER = "order"
+    BY = "by"
+    DESC = "desc"
 
 
 keywords = {
@@ -47,6 +50,9 @@ keywords = {
     "and": TokenType.AND,
     "or": TokenType.OR,
     "limit": TokenType.LIMIT,
+    "order": TokenType.ORDER,
+    "by": TokenType.BY,
+    "desc": TokenType.DESC,
 }
 
 operators = {
@@ -59,7 +65,7 @@ operators = {
 }
 
 
-@dataclasses.dataclass
+@dataclass
 class Token:
     token_type: TokenType
     literal: Union[int, str]

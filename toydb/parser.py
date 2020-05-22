@@ -2,7 +2,7 @@ from typing import List, Optional, Tuple, Type, Union
 
 from toydb.lexer import Lexer
 from toydb.sql_token import TokenType
-from toydb.statement import Conjunction, CreateTable, Insert, Select, WhereStatement
+from toydb.statement import Conjunction, CreateTable, Insert, OrderBy, Select, WhereStatement
 from toydb.where import Predicate, Where
 
 
@@ -87,6 +87,29 @@ class Parser:
         self.read_token()
         return limit
 
+    def parse_order_by(self) -> OrderBy:
+        if self.current_token is None or not self.current_token.token_type == TokenType.BY:
+            raise ValueError(f"expected BY token, was {self.current_token}")
+        self.read_token()
+        columns: List[str] = []
+        descending: List[bool] = []
+        done = False
+        while not done:
+            if self.current_token is None or not self.current_token.token_type == TokenType.IDENTIFIER:
+                raise ValueError(f"expected column identifier token, was {self.current_token}")
+            columns.append(str(self.current_token.literal))
+            self.read_token()
+            if self.current_token is not None and self.current_token.token_type == TokenType.DESC:
+                self.read_token()
+                descending.append(True)
+            else:
+                descending.append(False)
+            if self.current_token is not None and self.current_token.token_type == TokenType.COMMA:
+                self.read_token()
+            else:
+                done = True
+        return OrderBy(columns=columns, descending=descending)
+
     def parse_select(self) -> Select:
         columns = self.parse_select_column()
         if self.current_token is None or not self.current_token.token_type == TokenType.FROM:
@@ -99,11 +122,15 @@ class Parser:
         where: Optional[WhereStatement] = None
         if self.current_token is not None and self.current_token.token_type == TokenType.WHERE:
             where = self.parse_full_where()
-        limit: int = -1
+        limit: Optional[int] = None
         if self.current_token is not None and self.current_token.token_type == TokenType.LIMIT:
             self.read_token()
             limit = self.parse_limit()
-        return Select(columns=columns, table_name=table_name, where=where, limit=limit)
+        order_by: Optional[OrderBy] = None
+        if self.current_token is not None and self.current_token.token_type == TokenType.ORDER:
+            self.read_token()
+            order_by = self.parse_order_by()
+        return Select(columns=columns, table_name=table_name, where=where, limit=limit, order_by=order_by)
 
     def parse_insert_values(self) -> List[Union[str, int]]:
         values = []

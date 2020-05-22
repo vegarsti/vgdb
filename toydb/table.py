@@ -1,12 +1,21 @@
 import operator
-from typing import Callable, Dict, Iterator, List, Optional, Sequence, Tuple, Type, Union
+from typing import Callable, Dict, Iterable, Iterator, List, Optional, Sequence, Tuple, Type, Union
 
-from toydb.statement import Conjunction, WhereStatement
+from toydb.statement import Conjunction, OrderBy, WhereStatement
 from toydb.storage import Storage
 from toydb.where import Predicate
 
 d: Dict[Type, str] = {str: "text", int: "int"}
 d_inv: Dict[str, Type] = {"text": str, "int": int}
+
+
+def create_sort_key(
+    indices: Sequence[int], signs: Sequence[int]
+) -> Callable[[Sequence[Union[str, int]]], Tuple[Union[str, int], ...]]:
+    def sort_key(row: Sequence[Union[str, int]]) -> Tuple[Union[str, int], ...]:
+        return tuple(-sign * row[i] for i, sign in zip(indices, signs))
+
+    return sort_key
 
 
 def reduce_booleans_using_conjunctions(
@@ -24,13 +33,6 @@ def reduce_booleans_using_conjunctions(
 
 
 class Table:
-    """
-    Table file schema:
-    - Number of columns as NUMBER_OF_COLUMNS_INT_LENGTH sized int
-    - Sequence of column names and types. These strings are terminated by a null byte
-    - Sequence of rows
-    """
-
     def __init__(self, name: str, columns: Sequence[Tuple[str, Type]]) -> None:
         self.name = name
         self._file = Storage(filename=name, columns=columns)
@@ -51,12 +53,11 @@ class Table:
     def all_rows(self) -> Iterator[List[Union[int, str]]]:
         return self._file.read_rows()
 
-    def column_name_to_index(self, c: str) -> Optional[int]:
+    def column_name_to_index(self, c: str) -> int:
         try:
-            i = list(self._columns.keys()).index(c)
-            return i
+            return list(self._columns.keys()).index(c)
         except ValueError:
-            return None
+            raise ValueError(f"incorrect column {c}, table has schema {self.columns}")
 
     def column_indices_from_names(self, columns: List[str]) -> Optional[List[int]]:
         column_indices_to_select = []
@@ -71,9 +72,7 @@ class Table:
                 column_indices_to_select.append(j)
         return column_indices_to_select
 
-    def select(
-        self, columns: List[int], where: Optional[WhereStatement] = None, limit: int = -1
-    ) -> Iterator[List[Union[str, int]]]:
+    def where(self, rows: Iterable[List[Union[str, int]]], where: WhereStatement) -> Iterator[List[Union[str, int]]]:
         predicate_map = {
             Predicate.EQUALS: lambda a, b: a == b,
             Predicate.NOT_EQUALS: lambda a, b: a != b,
@@ -86,24 +85,36 @@ class Table:
             Conjunction.AND: operator.and_,
             Conjunction.OR: operator.or_,
         }
-        count = 0
-        for row in self.all_rows():
-            if count == limit:
-                return
+        for row in rows:
             should_yield = True
             if where is not None:
                 row_matches = [] * len(where.conditions)
                 for w in where.conditions:
                     i = self.column_name_to_index(w.column)
-                    assert i is not None
                     where_value_typed = list(self._columns.values())[i](w.value)
                     row_matches.append(predicate_map[w.predicate](row[i], where_value_typed))
                 conjunctions = [conjunction_map[c] for c in where.conjunctions]
                 should_yield = reduce_booleans_using_conjunctions(conditions=row_matches, conjunctions=conjunctions)
             if should_yield:
-                to_return = [row[i] for i in columns]
-                count += 1
-                yield to_return
+                yield row
+
+    def order_by(self, rows: Iterable[List[Union[str, int]]], order_by: OrderBy) -> Iterator[List[Union[str, int]]]:
+        order_by_indices = self.column_indices_from_names(order_by.columns)
+        if order_by_indices is None:
+            raise ValueError(
+                f"incorrect columns {', '.join(order_by.columns)} in ORDER BY: table has schema {self.columns}"
+            )
+        signs = [2 * int(b) - 1 for b in order_by.descending]
+        sort_key = create_sort_key(order_by_indices, signs)
+        return iter(sorted(rows, key=sort_key))
+
+    def limit(self, rows: Iterable[List[Union[str, int]]], limit: int) -> Iterator[List[Union[str, int]]]:
+        count = 0
+        for row in rows:
+            if limit == count:
+                return
+            count += 1
+            yield row
 
     def _strings_to_row(self, row: Sequence[str]) -> List[Union[int, str]]:
         data = [type_(value) for value, type_ in zip(row, self._columns.values())]
