@@ -38,7 +38,7 @@ class Select(Statement):
     columns: List[str]
     table_name: str
     where: Optional[WhereStatement] = None
-    limit: int = -1
+    limit: Optional[int] = None
     order_by: Optional[OrderBy] = None
 
 

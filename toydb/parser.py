@@ -122,7 +122,7 @@ class Parser:
         where: Optional[WhereStatement] = None
         if self.current_token is not None and self.current_token.token_type == TokenType.WHERE:
             where = self.parse_full_where()
-        limit: int = -1
+        limit: Optional[int] = None
         if self.current_token is not None and self.current_token.token_type == TokenType.LIMIT:
             self.read_token()
             limit = self.parse_limit()

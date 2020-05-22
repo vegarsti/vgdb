@@ -44,7 +44,13 @@ def read_int(f: IO[bytes]) -> int:
 
 
 class Storage:
-    """Storage layer for a table"""
+    """Storage layer for a table
+
+    Table file schema:
+    - Number of columns as NUMBER_OF_COLUMNS_INT_LENGTH sized int
+    - Sequence of column names and types. These strings are terminated by a null byte
+    - Sequence of rows
+    """
 
     def __init__(self, filename: str, columns: Sequence[Tuple[str, Type]]) -> None:
         self._file = Path(f"{filename}.db")
