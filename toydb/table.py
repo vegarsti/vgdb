@@ -1,10 +1,11 @@
-import operator
+from itertools import islice
+from operator import and_, eq, ge, gt, le, lt, ne, or_
 from typing import Callable, Dict, Iterable, Iterator, List, Optional, Sequence, Tuple, Type, Union
 
 from toydb.statement import Conjunction, OrderBy, WhereStatement
 from toydb.storage import Storage
 from toydb.type import type_to_string
-from toydb.where import Predicate
+from toydb.where import Predicate, Where
 
 
 def create_sort_key(
@@ -16,10 +17,23 @@ def create_sort_key(
     return sort_key
 
 
+predicate_map = {
+    Predicate.EQUALS: eq,
+    Predicate.NOT_EQUALS: ne,
+    Predicate.LT: lt,
+    Predicate.GT: gt,
+    Predicate.LTEQ: le,
+    Predicate.GTEQ: ge,
+}
+conjunction_map = {
+    Conjunction.AND: and_,
+    Conjunction.OR: or_,
+}
+
+
 def reduce_booleans_using_conjunctions(
     conditions: List[bool], conjunctions: List[Callable[[bool, bool], bool]]
 ) -> bool:
-    assert len(conditions) == len(conjunctions) + 1
     if len(conditions) == 1:
         return conditions[0]
     condition_1 = conditions.pop(0)
@@ -58,41 +72,29 @@ class Table:
             raise ValueError(f"incorrect column {c}, table has schema {self.columns}")
 
     def column_indices_from_names(self, columns: List[str]) -> Optional[List[int]]:
-        column_indices_to_select = []
         if columns == ["all"]:
-            for i, _ in enumerate(self._columns.keys()):
-                column_indices_to_select.append(i)
-        else:
-            for c in columns:
-                j = self.column_name_to_index(c)
-                if j is None:
-                    return None
-                column_indices_to_select.append(j)
+            return [i for i, _ in enumerate(self._columns.keys())]
+        column_indices_to_select = []
+        for c in columns:
+            j = self.column_name_to_index(c)
+            if j is None:
+                return None
+            column_indices_to_select.append(j)
         return column_indices_to_select
 
+    def _where(self, row: List[Union[str, int]], where: Where) -> bool:
+        column_index = self.column_name_to_index(where.column)
+        type_of_column = self._types[column_index]
+        where_value_typed = type_of_column(where.value)
+        cell = row[column_index]
+        condition = predicate_map[where.predicate](cell, where_value_typed)
+        return condition
+
     def where(self, rows: Iterable[List[Union[str, int]]], where: WhereStatement) -> Iterator[List[Union[str, int]]]:
-        predicate_map = {
-            Predicate.EQUALS: lambda a, b: a == b,
-            Predicate.NOT_EQUALS: lambda a, b: a != b,
-            Predicate.LT: lambda a, b: a < b,
-            Predicate.GT: lambda a, b: a > b,
-            Predicate.LTEQ: lambda a, b: a <= b,
-            Predicate.GTEQ: lambda a, b: a >= b,
-        }
-        conjunction_map = {
-            Conjunction.AND: operator.and_,
-            Conjunction.OR: operator.or_,
-        }
         for row in rows:
-            should_yield = True
-            if where is not None:
-                row_matches = [] * len(where.conditions)
-                for w in where.conditions:
-                    i = self.column_name_to_index(w.column)
-                    where_value_typed = list(self._columns.values())[i](w.value)
-                    row_matches.append(predicate_map[w.predicate](row[i], where_value_typed))
-                conjunctions = [conjunction_map[c] for c in where.conjunctions]
-                should_yield = reduce_booleans_using_conjunctions(conditions=row_matches, conjunctions=conjunctions)
+            conditions = [self._where(row=row, where=w) for w in where.conditions]
+            conjunctions = [conjunction_map[c] for c in where.conjunctions]
+            should_yield = reduce_booleans_using_conjunctions(conditions=conditions, conjunctions=conjunctions)
             if should_yield:
                 yield row
 
@@ -107,16 +109,7 @@ class Table:
         return iter(sorted(rows, key=sort_key))
 
     def limit(self, rows: Iterable[List[Union[str, int]]], limit: int) -> Iterator[List[Union[str, int]]]:
-        count = 0
-        for row in rows:
-            if limit == count:
-                return
-            count += 1
-            yield row
-
-    def _strings_to_row(self, row: Sequence[str]) -> List[Union[int, str]]:
-        data = [type_(value) for value, type_ in zip(row, self._columns.values())]
-        return data
+        return islice(rows, limit)
 
     def insert(self, row: Sequence[Union[int, str]]) -> None:
         self._file.insert(row)

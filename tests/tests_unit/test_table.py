@@ -24,9 +24,6 @@ class TestTable:
         with pytest.raises(ValueError):
             table.insert(["a", "a"])
 
-    def test_strings_to_record_ok(self, table):
-        assert table._strings_to_row(["hei", "1"]) == ["hei", 1]
-
     def test_all_rows(self, table):
         table.insert(["a", "1"])
         table.insert(["b", "2"])
@@ -46,6 +43,12 @@ class TestTable:
             where=WhereStatement(conditions=[Where(column="a", predicate=Predicate.EQUALS, value=3)], conjunctions=[]),
         )
         assert list(result) == []
+
+    def test_limit(self, table):
+        table.insert(["a", 1])
+        table.insert(["b", 2])
+        result = table.limit(rows=table.all_rows(), limit=1)
+        assert list(result) == [["a", 1]]
 
     def test_reduce(self):
         assert reduce_booleans_using_conjunctions(conditions=[True, False], conjunctions=[and_]) is False
