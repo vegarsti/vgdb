@@ -6,10 +6,10 @@ from toydb.storage import Storage
 @pytest.fixture
 def storage():
     name = "a"
-    s1 = Storage(name, columns=(("a", int), ("b", str)))
-    s1.persist()
-    yield s1
-    s1.delete()
+    s = Storage(name, columns=(("a", int), ("b", str)))
+    s.persist()
+    yield s
+    s.delete()
 
 
 class TestStorage:
@@ -34,13 +34,7 @@ class TestStorage:
         with pytest.raises(FileNotFoundError):
             Storage.from_file("a")
 
-    def test_read_row(self):
-        pass
-
     def test_write_row(self, storage):
         row = [1, "hei"]
         storage.insert(row)
         assert list(storage.read_rows()) == [row]
-
-    def test_delete(self):
-        pass

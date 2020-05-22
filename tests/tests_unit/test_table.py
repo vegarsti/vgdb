@@ -33,19 +33,16 @@ class TestTable:
         rows = list(i for i in table.all_rows())
         assert rows == [["a", 1], ["b", 2]]
 
-    def test_rows_iterator(self, table):
-        table.insert(["a", 1])
-        table.insert(["b", 2])
-        assert list(table.where()) == [["a", 1], ["b", 2]]
-
     def test_rows_with_where(self, table):
         table.insert(["a", 1])
         table.insert(["b", 2])
         result = table.where(
+            rows=table.all_rows(),
             where=WhereStatement(conditions=[Where(column="a", predicate=Predicate.EQUALS, value=1)], conjunctions=[]),
         )
         assert list(result) == [["a", 1]]
         result = table.where(
+            rows=table.all_rows(),
             where=WhereStatement(conditions=[Where(column="a", predicate=Predicate.EQUALS, value=3)], conjunctions=[]),
         )
         assert list(result) == []

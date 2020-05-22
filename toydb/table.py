@@ -3,10 +3,8 @@ from typing import Callable, Dict, Iterable, Iterator, List, Optional, Sequence,
 
 from toydb.statement import Conjunction, OrderBy, WhereStatement
 from toydb.storage import Storage
+from toydb.type import type_to_string
 from toydb.where import Predicate
-
-d: Dict[Type, str] = {str: "text", int: "int"}
-d_inv: Dict[str, Type] = {"text": str, "int": int}
 
 
 def create_sort_key(
@@ -44,11 +42,11 @@ class Table:
         try:
             self._file.persist()
         except FileExistsError:
-            raise ValueError
+            raise ValueError(f"table {self.name} already exists")
 
     @property
     def columns(self) -> str:
-        return "(" + ", ".join(f"{name} {d[type_]}" for name, type_ in self._columns.items()) + ")"
+        return "(" + ", ".join(f"{name} {type_to_string[type_]}" for name, type_ in self._columns.items()) + ")"
 
     def all_rows(self) -> Iterator[List[Union[int, str]]]:
         return self._file.read_rows()

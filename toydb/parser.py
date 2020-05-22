@@ -122,14 +122,16 @@ class Parser:
         where: Optional[WhereStatement] = None
         if self.current_token is not None and self.current_token.token_type == TokenType.WHERE:
             where = self.parse_full_where()
-        limit: Optional[int] = None
-        if self.current_token is not None and self.current_token.token_type == TokenType.LIMIT:
-            self.read_token()
-            limit = self.parse_limit()
         order_by: Optional[OrderBy] = None
         if self.current_token is not None and self.current_token.token_type == TokenType.ORDER:
             self.read_token()
             order_by = self.parse_order_by()
+        limit: Optional[int] = None
+        if self.current_token is not None and self.current_token.token_type == TokenType.LIMIT:
+            self.read_token()
+            limit = self.parse_limit()
+        if self.current_token is not None:
+            raise ValueError(f"Expected no more tokens, got {self.current_token}")
         return Select(columns=columns, table_name=table_name, where=where, limit=limit, order_by=order_by)
 
     def parse_insert_values(self) -> List[Union[str, int]]:
@@ -167,6 +169,8 @@ class Parser:
         if self.current_token is None or not self.current_token.token_type == TokenType.RPAREN:
             raise ValueError(f"expected RPAREN token, was {self.current_token}")
         self.read_token()
+        if self.current_token is not None:
+            raise ValueError(f"Expected no more tokens, got {self.current_token}")
         return Insert(values=values, table_name=table_name)
 
     def parse_create_table_columns(self) -> List[Tuple[str, Type]]:
@@ -205,6 +209,8 @@ class Parser:
         table_name = str(self.current_token.literal)
         self.read_token()
         columns = self.parse_create_table_columns()
+        if self.current_token is not None:
+            raise ValueError(f"Expected no more tokens, got {self.current_token}")
         return CreateTable(table_name=table_name, columns=columns)
 
     def parse(self) -> Union[Select, Insert, CreateTable]:
