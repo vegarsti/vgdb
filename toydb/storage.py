@@ -1,3 +1,4 @@
+import struct
 from pathlib import Path
 from typing import IO, Dict, Iterator, List, Sequence, Tuple, Type, Union
 
@@ -21,14 +22,20 @@ def read_null_terminated_string(f: IO[bytes]) -> str:
     return s
 
 
+def string_to_null_terminated_byte_string(s: str) -> bytes:
+    return s.encode("ascii") + NULL_BYTE
+
+
 def write_string(f: IO[bytes], s: str) -> None:
-    s_ascii = s.encode("ascii")
-    f.write(s_ascii)
-    f.write(NULL_BYTE)
+    f.write(string_to_null_terminated_byte_string(s))
+
+
+def int_to_bytes(i: int) -> bytes:
+    return i.to_bytes(INT_BYTE_SIZE, ENDIANNESS)
 
 
 def write_int(f: IO[bytes], i: int) -> None:
-    f.write(i.to_bytes(INT_BYTE_SIZE, ENDIANNESS))
+    f.write(int_to_bytes(i))
 
 
 def write_tiny_int(f: IO[bytes], i: int) -> None:
@@ -98,14 +105,26 @@ class Storage:
         return s
 
     def insert(self, row: Sequence[Union[int, str]]) -> None:
+        fields = ["<"]
+        values: List[bytes] = []
+        for cell, typ in zip(row, self._columns.values()):
+            if typ == str:
+                v = string_to_null_terminated_byte_string(str(cell))
+                fields.append(str(len(v)) + "s")
+                values.append(v)
+            elif typ == int:
+                fields.append("I")
+                values.append(int_to_bytes(int(cell)))
+            else:
+                raise ValueError(f"{cell} is of unsupported type {typ}")
+        s = struct.Struct(" ".join(fields))
+        # to_write: bytes = ""
+        try:
+            to_write = s.pack(*values)
+        except struct.error as e:
+            raise ValueError(e)
         with self._file.open("ba+") as f:
-            for cell, typ in zip(row, self._columns.values()):
-                if typ == str:
-                    write_string(f, str(cell))
-                elif typ == int:
-                    write_int(f, int(cell))
-                else:
-                    raise ValueError("unsupported type")
+            f.write(to_write)
 
     def read_rows(self) -> Iterator[List[Union[int, str]]]:
         with self._file.open("rb") as f:
