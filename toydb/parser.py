@@ -23,13 +23,15 @@ class Parser:
     def current_token_in(self, token_types: Sequence[TokenType]) -> bool:
         return self.current_token is not None and self.current_token.token_type in token_types
 
-    def read_token_if_present(self, token_type: TokenType) -> None:
-        if self.current_token is not None and self.current_token.token_type == token_type:
-            self.advance_token()
+    def expect_token_is(self, token_type: TokenType) -> Token:
+        if self.current_token is None or not self.current_token.token_type == token_type:
+            raise ValueError(f"expected {token_type}, was {self.current_token}")
+        return self.current_token
 
-    def read_token_if_present_(self, token_types: Sequence[TokenType]) -> None:
-        if self.current_token is not None and self.current_token.token_type in token_types:
-            self.advance_token()
+    def expect_token_in(self, token_types: Sequence[TokenType]) -> Token:
+        if self.current_token is None or self.current_token.token_type not in token_types:
+            raise ValueError(f"expected any of {token_types}, was {self.current_token}")
+        return self.current_token
 
     def parse_full_where(self) -> WhereStatement:
         where: List[Where] = []
@@ -44,16 +46,6 @@ class Parser:
             else:
                 done = True
         return WhereStatement(conditions=where, conjunctions=conjunctions)
-
-    def expect_token_is(self, token_type: TokenType) -> Token:
-        if self.current_token is None or not self.current_token.token_type == token_type:
-            raise ValueError(f"expected {token_type}, was {self.current_token}")
-        return self.current_token
-
-    def expect_token_in(self, token_types: Sequence[TokenType]) -> Token:
-        if self.current_token is None or self.current_token.token_type not in token_types:
-            raise ValueError(f"expected any of {token_types}, was {self.current_token}")
-        return self.current_token
 
     def parse_where_clause(self) -> Where:
         token = self.expect_token_is(TokenType.IDENTIFIER)
