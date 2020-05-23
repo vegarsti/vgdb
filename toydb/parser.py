@@ -1,7 +1,7 @@
 from typing import List, Optional, Sequence, Tuple, Type, Union
 
 from toydb.lexer import Lexer
-from toydb.sql_token import TokenType
+from toydb.sql_token import Token, TokenType
 from toydb.statement import Conjunction, CreateTable, Insert, OrderBy, Select, WhereStatement
 from toydb.type import string_to_type
 from toydb.where import Predicate, Where
@@ -45,28 +45,27 @@ class Parser:
                 done = True
         return WhereStatement(conditions=where, conjunctions=conjunctions)
 
-    def expect_token_is(self, token_type: TokenType) -> None:
+    def expect_token_is(self, token_type: TokenType) -> Token:
         if self.current_token is None or not self.current_token.token_type == token_type:
             raise ValueError(f"expected {token_type}, was {self.current_token}")
+        return self.current_token
 
-    def expect_token_in(self, token_types: Sequence[TokenType]) -> None:
+    def expect_token_in(self, token_types: Sequence[TokenType]) -> Token:
         if self.current_token is None or self.current_token.token_type not in token_types:
             raise ValueError(f"expected any of {token_types}, was {self.current_token}")
+        return self.current_token
 
     def parse_where_clause(self) -> Where:
-        self.expect_token_is(TokenType.IDENTIFIER)
-        assert self.current_token is not None
-        column = str(self.current_token.literal)
+        token = self.expect_token_is(TokenType.IDENTIFIER)
+        column = str(token.literal)
         self.advance_token()
-        self.expect_token_in(
+        token = self.expect_token_in(
             (TokenType.EQUALS, TokenType.NOT_EQUALS, TokenType.LTEQ, TokenType.GTEQ, TokenType.LT, TokenType.GT)
         )
-        assert self.current_token is not None
-        predicate = Predicate(self.current_token.literal)
+        predicate = Predicate(token.literal)
         self.advance_token()
-        self.expect_token_in((TokenType.STRING, TokenType.INT))
-        assert self.current_token is not None
-        value = self.current_token.literal
+        token = self.expect_token_in((TokenType.STRING, TokenType.INT))
+        value = token.literal
         self.advance_token()
         return Where(column=column, predicate=predicate, value=value)
 
@@ -77,9 +76,8 @@ class Parser:
             self.advance_token()
             return ["all"]
         while not done:
-            self.expect_token_is(TokenType.IDENTIFIER)
-            assert self.current_token is not None
-            columns.append(str(self.current_token.literal))
+            token = self.expect_token_is(TokenType.IDENTIFIER)
+            columns.append(str(token.literal))
             self.advance_token()
             if self.current_token_is(TokenType.COMMA):
                 self.advance_token()
@@ -88,9 +86,8 @@ class Parser:
         return columns
 
     def parse_limit(self) -> int:
-        self.expect_token_is(TokenType.INT)
-        assert self.current_token is not None
-        limit = int(self.current_token.literal)
+        token = self.expect_token_is(TokenType.INT)
+        limit = int(token.literal)
         self.advance_token()
         return limit
 
@@ -101,9 +98,8 @@ class Parser:
         descending: List[bool] = []
         done = False
         while not done:
-            self.expect_token_is(TokenType.IDENTIFIER)
-            assert self.current_token is not None
-            columns.append(str(self.current_token.literal))
+            token = self.expect_token_is(TokenType.IDENTIFIER)
+            columns.append(str(token.literal))
             self.advance_token()
             if self.current_token_is(TokenType.DESC):
                 self.advance_token()
@@ -120,9 +116,8 @@ class Parser:
         columns = self.parse_select_column()
         self.expect_token_is(TokenType.FROM)
         self.advance_token()
-        self.expect_token_is(TokenType.IDENTIFIER)
-        assert self.current_token is not None
-        table_name = str(self.current_token.literal)
+        token = self.expect_token_is(TokenType.IDENTIFIER)
+        table_name = str(token.literal)
         self.advance_token()
         where: Optional[WhereStatement] = None
         if self.current_token_is(TokenType.WHERE):
@@ -185,12 +180,11 @@ class Parser:
         self.expect_token_is(TokenType.LPAREN)
         self.advance_token()
         while not done:
-            self.expect_token_is(TokenType.IDENTIFIER)
-            assert self.current_token is not None
-            column_name = str(self.current_token.literal)
+            token = self.expect_token_is(TokenType.IDENTIFIER)
+            column_name = str(token.literal)
             self.advance_token()
-            self.expect_token_in((TokenType.TEXT_TYPE, TokenType.INT_TYPE))
-            value = string_to_type[str(self.current_token.literal)]
+            token = self.expect_token_in((TokenType.TEXT_TYPE, TokenType.INT_TYPE))
+            value = string_to_type[str(token.literal)]
             columns.append((column_name, value))
             self.advance_token()
             if self.current_token_is(TokenType.COMMA):
@@ -204,9 +198,8 @@ class Parser:
     def parse_create_table(self) -> CreateTable:
         self.expect_token_is(TokenType.TABLE)
         self.advance_token()
-        self.expect_token_is(TokenType.IDENTIFIER)
-        assert self.current_token is not None
-        table_name = str(self.current_token.literal)
+        token = self.expect_token_is(TokenType.IDENTIFIER)
+        table_name = str(token.literal)
         self.advance_token()
         columns = self.parse_create_table_columns()
         if self.current_token is not None:
