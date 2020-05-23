@@ -1,6 +1,7 @@
 import re
+from functools import partial
 from itertools import islice
-from operator import and_, eq, ge, gt, le, lt, ne, or_
+from operator import and_, eq, ge, gt, itemgetter, le, lt, ne, or_
 from typing import Callable, Dict, Iterable, Iterator, List, Optional, Sequence, Tuple, Type, Union
 
 from toydb.statement import Conjunction, OrderBy, WhereStatement
@@ -10,8 +11,10 @@ from toydb.where import Predicate, Where
 
 
 def create_sort_key(
-    indices: Sequence[int], signs: Sequence[int]
+    indices: Sequence[int], descending: Sequence[bool]
 ) -> Callable[[Sequence[Union[str, int]]], Tuple[Union[str, int], ...]]:
+    signs = (2 * int(b) - 1 for b in descending)
+
     def sort_key(row: Sequence[Union[str, int]]) -> Tuple[Union[str, int], ...]:
         return tuple(-sign * row[i] for i, sign in zip(indices, signs))
 
@@ -36,31 +39,31 @@ def create_like_key(like: str) -> Callable[[str], bool]:
     return f
 
 
-predicate_map = {
+predicate_map: Dict[Predicate, Callable[[Union[int, str], Union[int, str]], bool]] = {
     Predicate.EQUALS: eq,
     Predicate.NOT_EQUALS: ne,
-    Predicate.LT: lt,
-    Predicate.GT: gt,
-    Predicate.LTEQ: le,
-    Predicate.GTEQ: ge,
+    Predicate.LT: gt,
+    Predicate.GT: lt,
+    Predicate.LTEQ: ge,
+    Predicate.GTEQ: le,
 }
-conjunction_map = {
+conjunction_map: Dict[Conjunction, Callable[[bool, bool], bool]] = {
     Conjunction.AND: and_,
     Conjunction.OR: or_,
 }
 
 
 def reduce_booleans_using_conjunctions(
-    conditions: List[bool], conjunctions: List[Callable[[bool, bool], bool]]
+    conditions: List[bool], conjunctions: Sequence[Callable[[bool, bool], bool]]
 ) -> bool:
     if len(conditions) == 1:
         return conditions[0]
-    condition_1 = conditions.pop(0)
-    condition_2 = conditions.pop(0)
-    conjunction = conjunctions.pop(0)
+    condition_1 = conditions[0]
+    condition_2 = conditions[1]
+    conjunction = conjunctions[0]
     new_value = conjunction(condition_1, condition_2)
-    new_conditions = [new_value] + conditions
-    return reduce_booleans_using_conjunctions(conditions=new_conditions, conjunctions=conjunctions)
+    new_conditions = [new_value] + conditions[2:]
+    return reduce_booleans_using_conjunctions(conditions=new_conditions, conjunctions=conjunctions[1:])
 
 
 class Table:
@@ -69,7 +72,7 @@ class Table:
         self._file = Storage(filename=name, columns=columns)
         self._spec = tuple(columns)
         self._columns: Dict[str, Type] = {name: type_ for name, type_ in columns}
-        self._types = list(self._columns.values())
+        self._types = tuple(self._columns.values())
 
     def persist(self) -> None:
         try:
@@ -101,24 +104,29 @@ class Table:
             column_indices_to_select.append(j)
         return column_indices_to_select
 
-    def _where(self, row: List[Union[str, int]], where: Where) -> bool:
+    def create_predicate(self, where: Where) -> Callable[[Union[int, str]], bool]:
         column_index = self.column_name_to_index(where.column)
         type_of_column = self._types[column_index]
-        where_value_typed = type_of_column(where.value)
-        cell = row[column_index]
+        predicate: Callable[[Union[int, str]], bool]
         if where.predicate == Predicate.LIKE:
-            if not isinstance(cell, str):
+            if type_of_column != str:
                 raise ValueError("LIKE must be used with string columns")
-            condition = create_like_key(where_value_typed)(cell)
+            where_value_typed = str(where.value)
+            predicate = create_like_key(where_value_typed)  # type: ignore
         else:
-            condition = predicate_map[where.predicate](cell, where_value_typed)
-        return condition
+            where_value_typed = type_of_column(where.value)
+            predicate_operator = predicate_map[where.predicate]
+            predicate = partial(predicate_operator, where_value_typed)
+        return predicate
 
     def where(self, rows: Iterable[List[Union[str, int]]], where: WhereStatement) -> Iterator[List[Union[str, int]]]:
+        conjunctions = [conjunction_map[c] for c in where.conjunctions]
+        predicates = [self.create_predicate(w) for w in where.conditions]
+        column_indices = [self.column_name_to_index(w.column) for w in where.conditions]
+        getters = [itemgetter(c) for c in column_indices]
         for row in rows:
-            conditions = [self._where(row=row, where=w) for w in where.conditions]
-            conjunctions = [conjunction_map[c] for c in where.conjunctions]
-            should_yield = reduce_booleans_using_conjunctions(conditions=conditions, conjunctions=conjunctions)
+            boolean_results = [predicate(getter(row)) for getter, predicate in zip(getters, predicates)]
+            should_yield = reduce_booleans_using_conjunctions(conditions=boolean_results, conjunctions=conjunctions)
             if should_yield:
                 yield row
 
@@ -128,8 +136,7 @@ class Table:
             raise ValueError(
                 f"incorrect columns {', '.join(order_by.columns)} in ORDER BY: table has schema {self.columns}"
             )
-        signs = [2 * int(b) - 1 for b in order_by.descending]
-        sort_key = create_sort_key(order_by_indices, signs)
+        sort_key = create_sort_key(order_by_indices, order_by.descending)
         return iter(sorted(rows, key=sort_key))
 
     def limit(self, rows: Iterable[List[Union[str, int]]], limit: int) -> Iterator[List[Union[str, int]]]:
