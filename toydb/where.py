@@ -10,6 +10,7 @@ class Predicate(Enum):
     GT = ">"
     LTEQ = "<="
     GTEQ = ">="
+    LIKE = "like"
 
 
 @dataclass

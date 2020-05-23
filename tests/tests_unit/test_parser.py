@@ -75,6 +75,16 @@ class TestParser:
                 ),
             ),
             (
+                "select a from b where a like 'a'",
+                Select(
+                    columns=["a"],
+                    table_name="b",
+                    where=WhereStatement(
+                        conditions=[Where(column="a", predicate=Predicate.LIKE, value="a")], conjunctions=[],
+                    ),
+                ),
+            ),
+            (
                 "select a from b where a < 1",
                 Select(
                     columns=["a"],

@@ -52,11 +52,22 @@ class Parser:
         column = str(token.literal)
         self.advance_token()
         token = self.expect_token_in(
-            (TokenType.EQUALS, TokenType.NOT_EQUALS, TokenType.LTEQ, TokenType.GTEQ, TokenType.LT, TokenType.GT)
+            (
+                TokenType.EQUALS,
+                TokenType.NOT_EQUALS,
+                TokenType.LTEQ,
+                TokenType.GTEQ,
+                TokenType.LT,
+                TokenType.GT,
+                TokenType.LIKE,
+            )
         )
         predicate = Predicate(token.literal)
         self.advance_token()
-        token = self.expect_token_in((TokenType.STRING, TokenType.INT))
+        if token.token_type == TokenType.LIKE:
+            token = self.expect_token_is(TokenType.STRING)
+        else:
+            token = self.expect_token_in((TokenType.STRING, TokenType.INT))
         value = token.literal
         self.advance_token()
         return Where(column=column, predicate=predicate, value=value)

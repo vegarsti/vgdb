@@ -33,6 +33,7 @@ class TokenType(Enum):
     ORDER = "order"
     BY = "by"
     DESC = "desc"
+    LIKE = "like"
 
 
 keywords = {
@@ -53,6 +54,7 @@ keywords = {
     "order": TokenType.ORDER,
     "by": TokenType.BY,
     "desc": TokenType.DESC,
+    "like": TokenType.LIKE,
 }
 
 operators = {

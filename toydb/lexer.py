@@ -37,10 +37,10 @@ class Lexer:
 
     def read_string(self) -> Token:
         start_position = self.pos
-        while self.next_character.isalpha() or self.next_character == " ":
+        while not self.next_character == "'":
+            if self.next_character == ";":
+                raise ValueError("String must end with a '")
             self.read_char()
-        if not self.next_character == "'":
-            raise ValueError("String needs to end with a '")
         end_position = self.pos
         self.read_char()
         return Token(token_type=TokenType.STRING, literal=self.program[start_position:end_position])

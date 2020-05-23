@@ -1,3 +1,4 @@
+import re
 from itertools import islice
 from operator import and_, eq, ge, gt, le, lt, ne, or_
 from typing import Callable, Dict, Iterable, Iterator, List, Optional, Sequence, Tuple, Type, Union
@@ -15,6 +16,24 @@ def create_sort_key(
         return tuple(-sign * row[i] for i, sign in zip(indices, signs))
 
     return sort_key
+
+
+def create_like_key(like: str) -> Callable[[str], bool]:
+    pattern = "^"
+    for i in like:
+        if i == "%":
+            pattern += "(.*)"
+        elif i == "_":
+            pattern += "(.){1}"
+        else:
+            pattern += i
+    pattern += "$"
+    regex_rule = re.compile(pattern)
+
+    def f(cell: str) -> bool:
+        return regex_rule.search(cell) is not None
+
+    return f
 
 
 predicate_map = {
@@ -87,7 +106,12 @@ class Table:
         type_of_column = self._types[column_index]
         where_value_typed = type_of_column(where.value)
         cell = row[column_index]
-        condition = predicate_map[where.predicate](cell, where_value_typed)
+        if where.predicate == Predicate.LIKE:
+            if not isinstance(cell, str):
+                raise ValueError("LIKE must be used with string columns")
+            condition = create_like_key(where_value_typed)(cell)
+        else:
+            condition = predicate_map[where.predicate](cell, where_value_typed)
         return condition
 
     def where(self, rows: Iterable[List[Union[str, int]]], where: WhereStatement) -> Iterator[List[Union[str, int]]]:
