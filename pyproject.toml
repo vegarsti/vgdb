@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "toydb"
+name = "vgdb"
 version = "0.1.0"
-description = "An RDBMS"
+description = "An RDBMS for fun"
 authors = ["Vegard Stikbakke <vegard.stikbakke@gmail.com>"]
 license = "MIT"
 

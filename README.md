@@ -1,4 +1,4 @@
-# toydb
+# vgdb
 
 An RDBMS, written as a learning project.
 
@@ -15,20 +15,20 @@ To try,
 
 ## Project Outline
 
-- [x] **REPL:** Basic REPL in place, with full-screen terminal, using Blessings (full screen and location) and Python Prompt Toolkit (history and colors).
+- [x] **REPL** 
 
-- [x] **Storage:** Some storage scheme. Stores each table in a separate file, using bytes.
+- [x] **Storage:** Some storage scheme. Stores each table in a separate file.
 
-- [x] **Redundancy:** Store the table when program finishes.
+- [x] **Redundancy:** Persist on write.
 
-- [x] **Data Types:** Some data types. Str and int for now.
+- [x] **Data Types:** `TEXT` and `INT` for now.
 
-- [ ] **Schemas:** Compulsory singular primary keys, unique and foreign key constraints, indexes.
+- [ ] **Schemas** Compulsory singular primary keys, unique and foreign key constraints, indexes.
 
-- [ ] **Transactions:** ?
+- [ ] **Transactions**
 
-- [ ] **Query Engine:** Query execution engine. Optimize.
+- [ ] **Query Engine:** Query execution engine.
 
-- [x] **Query Language:** Support for some SQL statements: `CREATE TABLE`, `SELECT` with `WHERE`, `INSERT`.
+- [x] **Query Language:** Support for SQL statements: `CREATE TABLE` with `TEXT` and `INT`, no index. `INSERT`. `SELECT` with `WHERE`, `ORDER BY`, `LIMIT` (with `OFFSET`).
 
 - [x] **Query Parser:** Hand-written lexer and parser.
