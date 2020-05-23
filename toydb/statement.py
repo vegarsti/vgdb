@@ -39,6 +39,7 @@ class Select(Statement):
     table_name: str
     where: Optional[WhereStatement] = None
     limit: Optional[int] = None
+    offset: Optional[int] = None
     order_by: Optional[OrderBy] = None
 
 

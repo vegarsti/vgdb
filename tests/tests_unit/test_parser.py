@@ -15,6 +15,10 @@ class TestParser:
             ("select * from b", Select(columns=["all"], table_name="b", where=None)),
             ("select * from b limit 1", Select(columns=["all"], table_name="b", where=None, limit=1)),
             (
+                "select * from b limit 1 offset 1",
+                Select(columns=["all"], table_name="b", where=None, limit=1, offset=1),
+            ),
+            (
                 "select * from b order by b limit 1",
                 Select(
                     columns=["all"],

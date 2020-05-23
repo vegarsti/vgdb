@@ -88,11 +88,11 @@ class Parser:
                 done = True
         return columns
 
-    def parse_limit(self) -> int:
+    def parse_int(self) -> int:
         token = self.expect_token_is(TokenType.INT)
-        limit = int(token.literal)
+        i = int(token.literal)
         self.advance_token()
-        return limit
+        return i
 
     def parse_order_by(self) -> OrderBy:
         self.expect_token_is(TokenType.BY)
@@ -131,12 +131,22 @@ class Parser:
             self.advance_token()
             order_by = self.parse_order_by()
         limit: Optional[int] = None
+        offset: Optional[int] = None
         if self.current_token_is(TokenType.LIMIT):
             self.advance_token()
-            limit = self.parse_limit()
+            limit = self.parse_int()
+            if limit < 1:
+                raise ValueError("LIMIT must be a positive integer")
+            if self.current_token_is(TokenType.OFFSET):
+                self.advance_token()
+                offset = self.parse_int()
+                if offset < 0:
+                    raise ValueError("OFFSET must be a positive integer")
         if self.current_token is not None:
             raise ValueError(f"Expected no more tokens, got {self.current_token}")
-        return Select(columns=columns, table_name=table_name, where=where, limit=limit, order_by=order_by)
+        return Select(
+            columns=columns, table_name=table_name, where=where, limit=limit, order_by=order_by, offset=offset
+        )
 
     def parse_insert_values(self) -> List[Union[str, int]]:
         values = []

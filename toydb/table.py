@@ -13,7 +13,7 @@ from toydb.where import Predicate, Where
 def create_sort_key(
     indices: Sequence[int], descending: Sequence[bool]
 ) -> Callable[[Sequence[Union[str, int]]], Tuple[Union[str, int], ...]]:
-    signs = (2 * int(b) - 1 for b in descending)
+    signs = [2 * int(b) - 1 for b in descending]
 
     def sort_key(row: Sequence[Union[str, int]]) -> Tuple[Union[str, int], ...]:
         return tuple(-sign * row[i] for i, sign in zip(indices, signs))
@@ -58,20 +58,17 @@ def reduce_booleans_using_conjunctions(
 ) -> bool:
     if len(conditions) == 1:
         return conditions[0]
-    condition_1 = conditions[0]
-    condition_2 = conditions[1]
-    conjunction = conjunctions[0]
-    new_value = conjunction(condition_1, condition_2)
-    new_conditions = [new_value] + conditions[2:]
-    return reduce_booleans_using_conjunctions(conditions=new_conditions, conjunctions=conjunctions[1:])
+    combined_value = conjunctions[0](conditions[0], conditions[1])
+    return reduce_booleans_using_conjunctions(
+        conditions=[combined_value] + conditions[2:], conjunctions=conjunctions[1:]
+    )
 
 
 class Table:
     def __init__(self, name: str, columns: Sequence[Tuple[str, Type]]) -> None:
         self.name = name
         self._file = Storage(filename=name, columns=columns)
-        self._spec = tuple(columns)
-        self._columns: Dict[str, Type] = {name: type_ for name, type_ in columns}
+        self._columns: Dict[str, Type] = {name: typ for name, typ in columns}
         self._types = tuple(self._columns.values())
 
     def persist(self) -> None:
@@ -82,7 +79,7 @@ class Table:
 
     @property
     def columns(self) -> str:
-        return "(" + ", ".join(f"{name} {type_to_string[type_]}" for name, type_ in self._columns.items()) + ")"
+        return "(" + ", ".join(f"{name} {type_to_string[typ]}" for name, typ in self._columns.items()) + ")"
 
     def all_rows(self) -> Iterator[List[Union[int, str]]]:
         return self._file.read_rows()
@@ -139,8 +136,13 @@ class Table:
         sort_key = create_sort_key(order_by_indices, order_by.descending)
         return iter(sorted(rows, key=sort_key))
 
-    def limit(self, rows: Iterable[List[Union[str, int]]], limit: int) -> Iterator[List[Union[str, int]]]:
-        return islice(rows, limit)
+    def limit(
+        self, rows: Iterable[List[Union[str, int]]], limit: int, offset: Optional[int]
+    ) -> Iterator[List[Union[str, int]]]:
+        if offset is None:
+            return islice(rows, limit)
+        else:
+            return islice(rows, offset, limit + offset)
 
     def insert(self, row: Sequence[Union[int, str]]) -> None:
         self._file.insert(row)

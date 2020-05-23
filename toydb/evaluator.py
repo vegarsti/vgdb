@@ -55,7 +55,7 @@ class Evaluator:
         if command.order_by is not None:
             rows = table.order_by(rows=rows, order_by=command.order_by)
         if command.limit is not None:
-            rows = table.limit(rows=rows, limit=command.limit)
+            rows = table.limit(rows=rows, limit=command.limit, offset=command.offset)
         to_return = []
         for row in rows:
             row_subset = [row[i] for i in table_indices]

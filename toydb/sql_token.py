@@ -34,6 +34,7 @@ class TokenType(Enum):
     BY = "by"
     DESC = "desc"
     LIKE = "like"
+    OFFSET = "offset"
 
 
 keywords = {
@@ -55,6 +56,7 @@ keywords = {
     "by": TokenType.BY,
     "desc": TokenType.DESC,
     "like": TokenType.LIKE,
+    "offset": TokenType.OFFSET,
 }
 
 operators = {
