@@ -1,0 +1,6 @@
+Created table benchmark with schema (number int, words text)
+Inserting 235886 records...                                              53.01294 seconds
+SELECT * FROM benchmark                                                   0.84236 seconds
+SELECT * FROM benchmark LIMIT 1                                           0.00014 seconds
+SELECT * FROM benchmark WHERE words LIKE 'a%'                             0.87544 seconds
+SELECT * FROM benchmark WHERE words LIKE 'a%' order by number             0.88227 seconds

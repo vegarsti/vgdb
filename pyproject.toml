@@ -21,7 +21,8 @@ mypy = "^0.770"
 ipython = "^7.14.0"
 
 [tool.poetry.scripts]
-repl = 'repl:main'
+repl = 'scripts.repl:main'
+benchmark = 'scripts.benchmark:main'
 
 [tool.black]
 line-length = 120

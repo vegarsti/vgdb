@@ -1,7 +1,5 @@
-import sys
-from typing import Dict, Union
+from typing import Dict, List, Union
 
-from vgdb.repl_utils import print_selection
 from vgdb.statement import CreateTable, Insert, Select
 from vgdb.table import Table
 
@@ -10,37 +8,38 @@ class Evaluator:
     def __init__(self, tables: Dict[str, Table]):
         self.tables = tables
 
-    def handle_command(self, command: Union[CreateTable, Insert, Select]) -> None:
+    def handle_command(self, command: Union[CreateTable, Insert, Select]) -> Union[str, List[List[Union[str, int]]]]:
+        result: Union[str, List[List[Union[str, int]]]]
         if isinstance(command, CreateTable):
-            self.handle_create(command)
+            result = self.handle_create(command)
         elif isinstance(command, Select):
-            self.handle_select(command=command)
+            result = self.handle_select(command=command)
         elif isinstance(command, Insert):
-            self.handle_insert(command=command)
+            result = self.handle_insert(command=command)
         else:
-            print("Command not handled. This shouldn't happen")
-            sys.exit(1)
+            raise ValueError("Command not handled. This shouldn't happen")
+        return result
 
-    def handle_create(self, command: CreateTable) -> None:
+    def handle_create(self, command: CreateTable) -> str:
         table = self.tables.get(command.table_name)
         if table is not None:
             raise ValueError(f"table {table.name} already exists with schema {table.columns}")
         else:
             table = Table(name=command.table_name, columns=command.columns)
             table.persist()
-            print(f"created table {table.name} with schema {table.columns}")
+            return f"Created table {table.name} with schema {table.columns}"
 
-    def handle_insert(self, command: Insert) -> None:
+    def handle_insert(self, command: Insert) -> str:
         table = self.tables.get(command.table_name)
         if table is None:
             raise ValueError(f"table {command.table_name} does not exist")
         try:
             table.insert(command.values)
-            print("OK")
         except ValueError:
-            print(f"attempted to insert invalid record, table has schema {table.columns}")
+            raise ValueError(f"attempted to insert invalid record, table has schema {table.columns}")
+        return "OK"
 
-    def handle_select(self, command: Select) -> None:
+    def handle_select(self, command: Select) -> List[List[Union[str, int]]]:
         table = self.tables.get(command.table_name)
         if table is None:
             raise ValueError(f"table {command.table_name} does not exist")
@@ -60,4 +59,4 @@ class Evaluator:
         for row in rows:
             row_subset = [row[i] for i in table_indices]
             to_return.append(row_subset)
-        print_selection(to_return)
+        return to_return
