@@ -8,9 +8,9 @@ Inspirations:
 - [sqlite clone in C](https://cstack.github.io/db_tutorial/)
 
 To try,
-- make sure [poetry](https://github.com/python-poetry/poetry) is installed
+- make sure [poetry](https://github.com/python-poetry/poetry) and Python >= 3.6 is installed.
 - ``poetry install``
-- ``poetry run python toydb/repl.py``
+- ``poetry run repl``
 
 
 ## Project Outline
