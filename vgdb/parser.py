@@ -1,10 +1,10 @@
 from typing import List, Optional, Sequence, Tuple, Type, Union
 
-from toydb.lexer import Lexer
-from toydb.sql_token import Token, TokenType
-from toydb.statement import Conjunction, CreateTable, Insert, OrderBy, Select, WhereStatement
-from toydb.type import string_to_type
-from toydb.where import Predicate, Where
+from vgdb.lexer import Lexer
+from vgdb.sql_token import Token, TokenType
+from vgdb.statement import Conjunction, CreateTable, Insert, OrderBy, Select, WhereStatement
+from vgdb.type import string_to_type
+from vgdb.where import Predicate, Where
 
 
 class Parser:

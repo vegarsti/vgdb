@@ -4,10 +4,10 @@ from itertools import islice
 from operator import and_, eq, ge, gt, itemgetter, le, lt, ne, or_
 from typing import Callable, Dict, Iterable, Iterator, List, Optional, Sequence, Tuple, Type, Union
 
-from toydb.statement import Conjunction, OrderBy, WhereStatement
-from toydb.storage import Storage
-from toydb.type import type_to_string
-from toydb.where import Predicate, Where
+from vgdb.statement import Conjunction, OrderBy, WhereStatement
+from vgdb.storage import Storage
+from vgdb.type import type_to_string
+from vgdb.where import Predicate, Where
 
 
 def create_sort_key(

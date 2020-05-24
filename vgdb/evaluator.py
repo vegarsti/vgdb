@@ -1,9 +1,9 @@
 import sys
 from typing import Dict, Union
 
-from toydb.repl_utils import print_selection
-from toydb.statement import CreateTable, Insert, Select
-from toydb.table import Table
+from vgdb.repl_utils import print_selection
+from vgdb.statement import CreateTable, Insert, Select
+from vgdb.table import Table
 
 
 class Evaluator:

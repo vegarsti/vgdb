@@ -1,6 +1,6 @@
 import pytest
 
-from toydb.storage import Storage
+from vgdb.storage import Storage
 
 
 @pytest.fixture

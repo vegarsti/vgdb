@@ -1,5 +1,5 @@
-from toydb.lexer import Lexer
-from toydb.sql_token import Token, TokenType
+from vgdb.lexer import Lexer
+from vgdb.sql_token import Token, TokenType
 
 
 class TestLexer:

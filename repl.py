@@ -6,11 +6,11 @@ from blessed import Terminal
 from prompt_toolkit import PromptSession
 from prompt_toolkit.styles import Style
 
-from toydb.evaluator import Evaluator
-from toydb.get_tables import get_tables
-from toydb.lexer import Lexer
-from toydb.parser import Parser
-from toydb.statement import CreateTable, Insert, Select
+from vgdb.evaluator import Evaluator
+from vgdb.get_tables import get_tables
+from vgdb.lexer import Lexer
+from vgdb.parser import Parser
+from vgdb.statement import CreateTable, Insert, Select
 
 
 def loop(prompt: Callable[[], str]) -> None:
@@ -42,7 +42,7 @@ def loop(prompt: Callable[[], str]) -> None:
 
 def main() -> None:
     style = Style.from_dict({"prompt": "red"})
-    message = [("class:prompt", "toydb> ")]
+    message = [("class:prompt", "vgdb> ")]
     session = PromptSession(style=style)
     toydb_prompt = partial(session.prompt, message)
     fullscreen = len(sys.argv) > 1 and sys.argv[1] == "f"

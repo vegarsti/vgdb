@@ -2,7 +2,7 @@ import struct
 from pathlib import Path
 from typing import IO, Dict, Iterator, List, Sequence, Tuple, Type, Union
 
-from toydb.type import string_to_type, type_to_string
+from vgdb.type import string_to_type, type_to_string
 
 NUMBER_OF_COLUMNS_INT_LENGTH = 1
 INT_BYTE_SIZE = 4

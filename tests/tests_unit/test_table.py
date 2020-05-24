@@ -2,9 +2,9 @@ from operator import and_, or_
 
 import pytest
 
-from toydb.statement import WhereStatement
-from toydb.table import Table, create_like_key, reduce_booleans_using_conjunctions
-from toydb.where import Predicate, Where
+from vgdb.statement import WhereStatement
+from vgdb.table import Table, create_like_key, reduce_booleans_using_conjunctions
+from vgdb.where import Predicate, Where
 
 
 @pytest.fixture
@@ -73,7 +73,7 @@ class TestTable:
     def test_limit(self, table):
         table.insert(["a", 1])
         table.insert(["b", 2])
-        result = table.limit(rows=table.all_rows(), limit=1)
+        result = table.limit(rows=table.all_rows(), limit=1, offset=0)
         assert list(result) == [["a", 1]]
 
     def test_reduce(self):

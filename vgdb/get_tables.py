@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Dict
 
-from toydb.table import Table
+from vgdb.table import Table
 
 
 def get_tables() -> Dict[str, Table]:

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from toydb.sql_token import Token, TokenType, keywords, operators
+from vgdb.sql_token import Token, TokenType, keywords, operators
 
 
 class Lexer:

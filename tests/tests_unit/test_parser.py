@@ -1,9 +1,9 @@
 import pytest
 
-from toydb.lexer import Lexer
-from toydb.parser import Parser
-from toydb.statement import Conjunction, CreateTable, Insert, OrderBy, Select, WhereStatement
-from toydb.where import Predicate, Where
+from vgdb.lexer import Lexer
+from vgdb.parser import Parser
+from vgdb.statement import Conjunction, CreateTable, Insert, OrderBy, Select, WhereStatement
+from vgdb.where import Predicate, Where
 
 
 class TestParser:
