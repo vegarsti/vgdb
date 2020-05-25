@@ -1,16 +1,17 @@
 # vgdb
 
-An RDBMS, written as a learning project.
+A relational database management system (RDBMS) in Python.
 
 Inspirations:
-- [Erik Grinaker's toydb](https://github.com/erikgrinaker/toydb)
-- [Phil Eaton's gosql](https://notes.eatonphil.com/database-basics.html)
-- [sqlite clone in C](https://cstack.github.io/db_tutorial/)
+- [Erik Grinaker's toydb in Rust](https://github.com/erikgrinaker/toydb)
+- [Phil Eaton's gosql in Go](https://notes.eatonphil.com/database-basics.html)
+- [cstack's sqlite clone in C](https://cstack.github.io/db_tutorial/)
 
-To try,
+## Instructions
 - make sure [poetry](https://github.com/python-poetry/poetry) and Python >= 3.6 is installed.
-- ``poetry install``
-- ``poetry run repl``
+- Run `poetry install` to install
+- Run `poetry run vgdb` to launch a command line REPL
+- Run `poetry run vgdb-bench` to run a benchmark where some lines are inserted and selected from
 
 
 ## Project Outline
@@ -29,6 +30,9 @@ To try,
 
 - [ ] **Query Engine:** Query execution engine.
 
-- [x] **Query Language:** Support for SQL statements: `CREATE TABLE` with `TEXT` and `INT`, no index. `INSERT`. `SELECT` with `WHERE`, `ORDER BY`, `LIMIT` (with `OFFSET`).
+- [x] **Query Language:** Support for SQL statements: 
+    - `CREATE TABLE` with `TEXT` and `INT`, no index
+    - `INSERT`
+    - `SELECT` with `WHERE`, `ORDER BY` and `LIMIT` (with `OFFSET`)
 
 - [x] **Query Parser:** Hand-written lexer and parser.
