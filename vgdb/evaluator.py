@@ -27,7 +27,7 @@ class Evaluator:
         else:
             table = Table(name=command.table_name, columns=command.columns)
             table.persist()
-            return f"Created table {table.name} with schema {table.columns}"
+            return f"Created table {table.name} with schema {table.columns}."
 
     def handle_insert(self, command: Insert) -> str:
         table = self.tables.get(command.table_name)

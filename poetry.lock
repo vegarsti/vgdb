@@ -81,7 +81,7 @@ description = "Easy, practical library for making terminal apps, by providing an
 name = "blessed"
 optional = false
 python-versions = "*"
-version = "1.17.5"
+version = "1.17.6"
 
 [package.dependencies]
 jinxed = ">=0.5.4"
@@ -574,8 +574,8 @@ black = [
     {file = "black-19.10b0.tar.gz", hash = "sha256:c2edb73a08e9e0e6f65a0e6af18b059b8b1cdd5bef997d7a0b181df93dc81539"},
 ]
 blessed = [
-    {file = "blessed-1.17.5-py2.py3-none-any.whl", hash = "sha256:af119076d8b6b7e027999d3ced80290b906d7cdc9e36264842e14e6cf0d4a9ef"},
-    {file = "blessed-1.17.5.tar.gz", hash = "sha256:926916492220af741657ec4668aba95f54a8c32445e765cfa38c7ccd3343cc6f"},
+    {file = "blessed-1.17.6-py2.py3-none-any.whl", hash = "sha256:8371d69ac55558e4b1591964873d6721136e9ea17a730aeb3add7d27761b134b"},
+    {file = "blessed-1.17.6.tar.gz", hash = "sha256:a9a774fc6eda05248735b0d86e866d640ca2fef26038878f7e4d23f7749a1e40"},
 ]
 cfgv = [
     {file = "cfgv-3.1.0-py2.py3-none-any.whl", hash = "sha256:1ccf53320421aeeb915275a196e23b3b8ae87dea8ac6698b1638001d4a486d53"},

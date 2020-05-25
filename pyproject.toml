@@ -21,8 +21,8 @@ flake8 = "^3.8.1"
 ipython = "^7.14.0"
 
 [tool.poetry.scripts]
-repl = 'scripts.repl:main'
-benchmark = 'scripts.benchmark:main'
+vgdb = 'scripts.vgdb:main'
+vgdb-bench = 'scripts.vgdb_bench:main'
 
 [tool.black]
 line-length = 120

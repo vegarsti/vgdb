@@ -47,7 +47,7 @@ def main_(db_name: str) -> None:
     create_command = f"CREATE TABLE {db_name} (number int, words text)"
     print(run_command(evaluator, create_command))
     insert_printout = f"Inserting {n} records..."
-    print(insert_printout, end="")
+    print(f"{insert_printout:<70}", end="")
     sys.stdout.flush()
     evaluator = Evaluator(tables=get_tables())
     start = time.time()
@@ -55,7 +55,7 @@ def main_(db_name: str) -> None:
         command = f"INSERT INTO benchmark VALUES ({i}, '{words[i]}')"
         run_command(evaluator, command)
     elapsed = time.time() - start
-    print(f"{elapsed:>53.5f} seconds")
+    print(f"{elapsed:>10.5f} seconds")
     time_command("SELECT * FROM benchmark")
     time_command("SELECT * FROM benchmark LIMIT 1")
     time_command("SELECT * FROM benchmark WHERE words LIKE 'a%'")
