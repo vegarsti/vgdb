@@ -28,17 +28,7 @@ def delete_db(db_name: str) -> None:
     (Path(__file__).parent.parent / f"{db_name}.db").unlink()
 
 
-def main() -> None:
-    db_name = "benchmark"
-    try:
-        main_(db_name)
-    except Exception as e:
-        print(e)
-    finally:
-        delete_db(db_name)
-
-
-def main_(db_name: str) -> None:
+def run_insert_benchmark(db_name: str) -> None:
     word_file = "/usr/share/dict/words"
     with open(word_file, "rb") as f:
         words = [s.decode("utf-8") for s in (f.read().splitlines())]
@@ -52,14 +42,38 @@ def main_(db_name: str) -> None:
     evaluator = Evaluator(tables=get_tables())
     start = time.time()
     for i in range(n):
-        command = f"INSERT INTO benchmark VALUES ({i}, '{words[i]}')"
+        command = f"INSERT INTO {db_name} VALUES ({i}, '{words[i]}')"
         run_command(evaluator, command)
     elapsed = time.time() - start
     print(f"{elapsed:>10.5f} seconds")
-    time_command("SELECT * FROM benchmark")
-    time_command("SELECT * FROM benchmark LIMIT 1")
-    time_command("SELECT * FROM benchmark WHERE words LIKE 'a%'")
-    time_command("SELECT * FROM benchmark WHERE words LIKE 'a%' order by number")
+    sys.exit()
+
+
+def run_select_benchmark(db_name: str) -> None:
+    time_command(f"SELECT * FROM {db_name}")
+    time_command(f"SELECT * FROM {db_name} LIMIT 1")
+    time_command(f"SELECT * FROM {db_name} WHERE words LIKE 'a%'")
+    time_command(f"SELECT * FROM {db_name} WHERE words LIKE 'a%' order by number")
+
+
+def insert() -> None:
+    insert_db = "bench_insert"
+    try:
+        run_insert_benchmark(insert_db)
+    except Exception as e:
+        print(e)
+    finally:
+        delete_db(insert_db)
+
+
+def select() -> None:
+    select_db = "bench_select"
+    run_select_benchmark(select_db)
+
+
+def main() -> None:
+    insert()
+    select()
 
 
 if __name__ == "__main__":

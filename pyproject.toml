@@ -23,6 +23,8 @@ ipython = "^7.14.0"
 [tool.poetry.scripts]
 vgdb = 'scripts.vgdb:main'
 vgdb-bench = 'scripts.vgdb_bench:main'
+vgdb-insert = 'scripts.vgdb_bench:insert'
+vgdb-select = 'scripts.vgdb_bench:select'
 
 [tool.black]
 line-length = 120
