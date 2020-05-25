@@ -54,13 +54,13 @@ conjunction_map: Dict[Conjunction, Callable[[bool, bool], bool]] = {
 
 
 def reduce_booleans_using_conjunctions(
-    conditions: List[bool], conjunctions: Sequence[Callable[[bool, bool], bool]]
+    predicate_results: List[bool], conjunctions: Sequence[Callable[[bool, bool], bool]]
 ) -> bool:
-    if len(conditions) == 1:
-        return conditions[0]
-    combined_value = conjunctions[0](conditions[0], conditions[1])
+    if len(predicate_results) == 1:
+        return predicate_results[0]
+    combined_value = conjunctions[0](predicate_results[0], predicate_results[1])
     return reduce_booleans_using_conjunctions(
-        conditions=[combined_value] + conditions[2:], conjunctions=conjunctions[1:]
+        predicate_results=[combined_value] + predicate_results[2:], conjunctions=conjunctions[1:]
     )
 
 
@@ -122,8 +122,10 @@ class Table:
         column_indices = [self.column_name_to_index(w.column) for w in where.conditions]
         getters = [itemgetter(c) for c in column_indices]
         for row in rows:
-            boolean_results = [predicate(getter(row)) for getter, predicate in zip(getters, predicates)]
-            should_yield = reduce_booleans_using_conjunctions(conditions=boolean_results, conjunctions=conjunctions)
+            predicate_results = [predicate(getter(row)) for getter, predicate in zip(getters, predicates)]
+            should_yield = reduce_booleans_using_conjunctions(
+                predicate_results=predicate_results, conjunctions=conjunctions
+            )
             if should_yield:
                 yield row
 

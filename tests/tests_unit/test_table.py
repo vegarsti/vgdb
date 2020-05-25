@@ -77,9 +77,11 @@ class TestTable:
         assert list(result) == [["a", 1]]
 
     def test_reduce(self):
-        assert reduce_booleans_using_conjunctions(conditions=[True, False], conjunctions=[and_]) is False
-        assert reduce_booleans_using_conjunctions(conditions=[True, False], conjunctions=[or_]) is True
-        assert reduce_booleans_using_conjunctions(conditions=[False, False, True], conjunctions=[and_, or_]) is True
+        assert reduce_booleans_using_conjunctions(predicate_results=[True, False], conjunctions=[and_]) is False
+        assert reduce_booleans_using_conjunctions(predicate_results=[True, False], conjunctions=[or_]) is True
+        assert (
+            reduce_booleans_using_conjunctions(predicate_results=[False, False, True], conjunctions=[and_, or_]) is True
+        )
 
     def test_make_like(self):
         key1 = create_like_key(like="a_")
