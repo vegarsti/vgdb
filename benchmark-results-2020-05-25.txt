@@ -1,0 +1,6 @@
+Created table bench_insert with schema (number int, words text).
+Inserting 235886 records...                                             39.53682 seconds
+SELECT * FROM bench_select                                               0.84630 seconds
+SELECT * FROM bench_select LIMIT 1                                       0.00015 seconds
+SELECT * FROM bench_select WHERE words LIKE 'a%'                         0.99097 seconds
+SELECT * FROM bench_select WHERE words LIKE 'a%' ORDER BY number         1.05791 seconds

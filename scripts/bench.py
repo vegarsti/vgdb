@@ -46,14 +46,13 @@ def run_insert_benchmark(db_name: str) -> None:
         run_command(evaluator, command)
     elapsed = time.time() - start
     print(f"{elapsed:>10.5f} seconds")
-    sys.exit()
 
 
 def run_select_benchmark(db_name: str) -> None:
     time_command(f"SELECT * FROM {db_name}")
     time_command(f"SELECT * FROM {db_name} LIMIT 1")
     time_command(f"SELECT * FROM {db_name} WHERE words LIKE 'a%'")
-    time_command(f"SELECT * FROM {db_name} WHERE words LIKE 'a%' order by number")
+    time_command(f"SELECT * FROM {db_name} WHERE words LIKE 'a%' ORDER BY number")
 
 
 def insert() -> None:
