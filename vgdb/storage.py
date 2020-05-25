@@ -1,4 +1,3 @@
-import struct
 from pathlib import Path
 from typing import IO, Dict, Iterator, List, Sequence, Tuple, Type, Union
 
@@ -95,29 +94,17 @@ class Storage:
         return s
 
     def insert(self, row: Sequence[Union[int, str]]) -> None:
-        endianness_specifier = {"little": "<"}[ENDIANNESS]
-        value_specifiers = [endianness_specifier]
-        values: List[Union[int, bytes]] = []
+        values: List[bytes] = []
         for cell, typ in zip(row, self._columns.values()):
             if typ == str:
-                v = string_to_null_terminated_byte_string(str(cell))
-                value_specifiers.append(str(len(v)) + "s")
-                values.append(v)
+                values.append(string_to_null_terminated_byte_string(str(cell)))
             elif typ == int:
-                value_specifiers.append("I")
-                values.append(int(cell))
+                values.append(int(cell).to_bytes(INT_BYTE_SIZE, byteorder=ENDIANNESS))
             else:
                 raise ValueError(f"{cell} is of unsupported type {typ}")
-        try:
-            x = " ".join(value_specifiers)
-            s = struct.Struct(x)
-            to_write = s.pack(*values)
-        except struct.error as e:
-            print(values)
-            print(value_specifiers)
-            raise ValueError(e)
         with self._file.open("ba+") as f:
-            f.write(to_write)
+            for v in values:
+                f.write(v)
 
     def read_rows(self) -> Iterator[List[Union[int, str]]]:
         with self._file.open("rb") as f:
