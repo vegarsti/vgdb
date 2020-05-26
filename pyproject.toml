@@ -6,7 +6,7 @@ authors = ["Vegard Stikbakke <vegard.stikbakke@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "3.8"
+python = "^3.7"
 blessed = "^1.17.4"
 pygments = "^2.6.1"
 prompt-toolkit = "^3.0.5"
