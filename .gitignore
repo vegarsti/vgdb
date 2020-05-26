@@ -2,4 +2,5 @@
 .mypy_cache
 *egg-info
 *.db
+*.vgdb
 test.py
