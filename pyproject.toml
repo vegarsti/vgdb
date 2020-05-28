@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "vgdb"
 version = "0.1.0"
-description = "An RDBMS for fun"
+description = "A SQL RDBMS"
 authors = ["Vegard Stikbakke <vegard.stikbakke@gmail.com>"]
 license = "MIT"
 

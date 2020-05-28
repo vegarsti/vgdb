@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import IO, Dict, Iterator, List, Sequence, Tuple, Type, Union
 
+from vgdb import VGDB_FILE_SUFFIX
 from vgdb.type import string_to_type, type_to_string
 
 NUMBER_OF_COLUMNS_INT_LENGTH = 1
@@ -49,7 +50,7 @@ class Storage:
     """
 
     def __init__(self, filename: str, columns: Sequence[Tuple[str, Type]]) -> None:
-        self._file = Path(f"{filename}.vgdb")
+        self._file = Path(f"{filename}.{VGDB_FILE_SUFFIX}")
         self._filename = filename
         self._spec = tuple(type_ for name, type_ in columns)
         self._columns_as_they_came = columns
@@ -84,7 +85,7 @@ class Storage:
     @classmethod
     def from_file(cls, table_name: str) -> "Storage":
         columns: List[Tuple[str, Type]] = []
-        with open(f"{table_name}.vgdb", "br+") as f:
+        with open(f"{table_name}.{VGDB_FILE_SUFFIX}", "br+") as f:
             number_of_columns = read_tiny_int(f)
             for _ in range(number_of_columns):
                 column_name = read_null_terminated_string(f)
