@@ -1,5 +1,7 @@
 # vgdb
 
+![test](https://github.com/vegarsti/vgdb/workflows/test/badge.svg)
+
 A relational database management system (RDBMS) in Python.
 
 Inspirations:
