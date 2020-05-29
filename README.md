@@ -12,10 +12,12 @@ Inspirations:
 - [cstack's sqlite clone in C](https://cstack.github.io/db_tutorial/)
 
 ## Instructions
-- make sure [poetry](https://github.com/python-poetry/poetry) and Python >= 3.6 is installed.
+You should not actually use this, you should use sqlite instead! But if you want to try it,
+
+- make sure [poetry](https://github.com/python-poetry/poetry) and Python >= 3.7 is installed.
 - Run `poetry install` to install
-- Run `poetry run vgdb` to launch a command line REPL
-- Run `poetry run vgdb-bench` to run a benchmark where some lines are inserted and selected from
+- Run `poetry run vgdb` to launch a command line REPL (or `poetry shell` and then `vgdb`)
+- Run `poetry run vgdb-bench` to run a benchmark of `INSERT` and `SELECT` performance compared to sqlite (warning: vgdb is crushed)
 
 
 ## Project Outline
