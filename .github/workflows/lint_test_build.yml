@@ -32,10 +32,13 @@ jobs:
     - name: mypy
       run: mypy .
     - name: Run tests
-      env:
-        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
       run: |
-        pytest -v tests --cov=.
+        pytest --cov=./ --cov-report=xml
         coveralls
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
+        fail_ci_if_error: true
     - name: Build package
       run: poetry build
