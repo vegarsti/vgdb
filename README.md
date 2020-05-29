@@ -4,16 +4,20 @@
 
 A relational database management system (RDBMS) in Python.
 
+![demo](https://user-images.githubusercontent.com/5699893/83227329-3549b780-a184-11ea-819a-afa4c61d5cb2.gif)
+
 Inspirations:
 - [Erik Grinaker's toydb in Rust](https://github.com/erikgrinaker/toydb)
 - [Phil Eaton's gosql in Go](https://notes.eatonphil.com/database-basics.html)
 - [cstack's sqlite clone in C](https://cstack.github.io/db_tutorial/)
 
 ## Instructions
-- make sure [poetry](https://github.com/python-poetry/poetry) and Python >= 3.6 is installed.
+You should not actually use this, you should use sqlite instead! But if you want to try it,
+
+- make sure [poetry](https://github.com/python-poetry/poetry) and Python >= 3.7 is installed.
 - Run `poetry install` to install
-- Run `poetry run vgdb` to launch a command line REPL
-- Run `poetry run vgdb-bench` to run a benchmark where some lines are inserted and selected from
+- Run `poetry run vgdb` to launch a command line REPL (or `poetry shell` and then `vgdb`)
+- Run `poetry run vgdb-bench` to run a benchmark of `INSERT` and `SELECT` performance compared to sqlite (warning: vgdb is crushed)
 
 
 ## Project Outline
