@@ -22,6 +22,6 @@ jobs:
       run: |
         python3 -m pip install --upgrade pip poetry
         poetry config virtualenvs.create false
-        poetry install --no-dev
+        poetry install
     - name: Build package
       run: poetry build
