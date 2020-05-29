@@ -2,6 +2,7 @@
 
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 ![lint_test_build](https://github.com/vegarsti/vgdb/workflows/lint_test_build/badge.svg)
+[![codecov](https://codecov.io/gh/vegarsti/vgdb/branch/master/graph/badge.svg)](https://codecov.io/gh/vegarsti/vgdb)
 
 A relational database management system (RDBMS) in Python.
 
