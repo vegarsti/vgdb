@@ -156,6 +156,11 @@ class Parser:
                 self.current_token.token_type == type_ for type_ in (TokenType.STRING, TokenType.INT)
             ):
                 raise ValueError(f"expected string or int value token, was {self.current_token}")
+            if (
+                self.current_token.token_type == TokenType.INT
+                and not -2_147_483_648 <= int(self.current_token.literal) <= 2_147_483_647
+            ):
+                raise ValueError("int value must be a 4 byte int, between -2 147 483 648 and 2 147 483 647")
             value = self.current_token.literal
             values.append(value)
             self.advance_token()

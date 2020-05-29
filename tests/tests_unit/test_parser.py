@@ -245,3 +245,12 @@ class TestParser:
         parser = Parser(lexer=lexer)
         statement = parser.parse()
         assert statement == expected
+
+    @pytest.mark.parametrize(
+        argnames="statement", argvalues=["INSERT INTO a VALUES (2147483648)", "INSERT INTO a VALUES (æ)"],
+    )
+    def test_parse_int_errors_if_too_big(self, statement):
+        lexer = Lexer(program=statement)
+        parser = Parser(lexer=lexer)
+        with pytest.raises(ValueError):
+            parser.parse()
