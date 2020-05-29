@@ -32,6 +32,10 @@ jobs:
     - name: mypy
       run: mypy .
     - name: Run tests
-      run: pytest -v tests
+      env:
+        COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+      run: |
+        pytest -v tests --cov=.
+        coveralls
     - name: Build package
       run: poetry build
