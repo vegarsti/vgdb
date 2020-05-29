@@ -1,4 +1,4 @@
-name: test
+name: build
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
   push:
     branches: [ master ]
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -22,6 +22,6 @@ jobs:
       run: |
         python3 -m pip install --upgrade pip poetry
         poetry config virtualenvs.create false
-        poetry install
-    - name: Run tests
-      run: pytest -v tests
+        poetry install --no-dev
+    - name: Build package
+      run: poetry build
