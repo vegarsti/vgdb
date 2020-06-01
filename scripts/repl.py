@@ -1,10 +1,8 @@
+import readline  # noqa
 import sys
-from functools import partial
-from typing import Callable, List, Optional, Union
+from typing import List, Optional, Union
 
 from blessed import Terminal
-from prompt_toolkit import PromptSession
-from prompt_toolkit.styles import Style
 
 from vgdb.evaluator import Evaluator
 from vgdb.get_tables import get_tables
@@ -47,12 +45,16 @@ def print_selection(table: List[List[Union[int, str]]]) -> None:
         print(" ".join(row))
 
 
-def loop(prompt: Callable[[], str]) -> None:
+def loop() -> None:
+    prompt = "vgdb> "
+    red = "\033[31m"
+    default = "\033[0m"
+    prompt_with_color = f"{red}{prompt}{default}"
     while True:
         tables = get_tables()
         evaluator = Evaluator(tables=tables)
         try:
-            user_input = prompt()
+            user_input = input(prompt_with_color)
         except (KeyboardInterrupt, EOFError):
             sys.exit(1)
         if user_input == "exit":
@@ -79,17 +81,13 @@ def loop(prompt: Callable[[], str]) -> None:
 
 
 def main() -> None:
-    style = Style.from_dict({"prompt": "red"})
-    message = [("class:prompt", "vgdb> ")]
-    session = PromptSession(style=style)
-    toydb_prompt = partial(session.prompt, message)
     fullscreen = len(sys.argv) > 1 and sys.argv[1] == "f"
     if fullscreen:
         term = Terminal()
         with term.fullscreen(), term.location(0, 0):
-            loop(toydb_prompt)
+            loop()
     else:
-        loop(toydb_prompt)
+        loop()
 
 
 if __name__ == "__main__":
