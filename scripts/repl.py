@@ -2,8 +2,6 @@ import readline  # noqa
 import sys
 from typing import List, Optional, Union
 
-from blessed import Terminal
-
 from vgdb.evaluator import Evaluator
 from vgdb.get_tables import get_tables
 from vgdb.lexer import Lexer
@@ -45,7 +43,7 @@ def print_selection(table: List[List[Union[int, str]]]) -> None:
         print(" ".join(row))
 
 
-def loop() -> None:
+def repl() -> None:
     prompt = "vgdb> "
     red = "\033[31m"
     default = "\033[0m"
@@ -81,13 +79,7 @@ def loop() -> None:
 
 
 def main() -> None:
-    fullscreen = len(sys.argv) > 1 and sys.argv[1] == "f"
-    if fullscreen:
-        term = Terminal()
-        with term.fullscreen(), term.location(0, 0):
-            loop()
-    else:
-        loop()
+    repl()
 
 
 if __name__ == "__main__":
