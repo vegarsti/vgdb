@@ -217,8 +217,8 @@ class TestParser:
     def test_parse_select(self, statement, expected):
         lexer = Lexer(program=statement)
         parser = Parser(lexer=lexer)
-        statement = parser.parse()
-        assert statement == expected
+        statements = list(parser.parse())
+        assert statements == [expected]
 
     @pytest.mark.parametrize(
         argnames=("statement", "expected"),
@@ -230,8 +230,8 @@ class TestParser:
     def test_parse_insert(self, statement, expected):
         lexer = Lexer(program=statement)
         parser = Parser(lexer=lexer)
-        statement = parser.parse()
-        assert statement == expected
+        statements = list(parser.parse())
+        assert statements == [expected]
 
     @pytest.mark.parametrize(
         argnames=("statement", "expected"),
@@ -243,8 +243,8 @@ class TestParser:
     def test_parse_create_table(self, statement, expected):
         lexer = Lexer(program=statement)
         parser = Parser(lexer=lexer)
-        statement = parser.parse()
-        assert statement == expected
+        statements = list(parser.parse())
+        assert statements == [expected]
 
     @pytest.mark.parametrize(
         argnames="statement", argvalues=["INSERT INTO a VALUES (2147483648)", "INSERT INTO a VALUES (æ)"],
@@ -253,4 +253,5 @@ class TestParser:
         lexer = Lexer(program=statement)
         parser = Parser(lexer=lexer)
         with pytest.raises(ValueError):
-            parser.parse()
+            for _ in parser.parse():
+                pass

@@ -35,6 +35,7 @@ class TokenType(Enum):
     DESC = "desc"
     LIKE = "like"
     OFFSET = "offset"
+    SEMICOLON = ";"
 
 
 keywords = {

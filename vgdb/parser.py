@@ -1,4 +1,4 @@
-from typing import List, Optional, Sequence, Tuple, Type, Union
+from typing import Iterator, List, Optional, Sequence, Tuple, Type, Union
 
 from vgdb.lexer import Lexer
 from vgdb.sql_token import Token, TokenType
@@ -142,7 +142,7 @@ class Parser:
                 offset = self.parse_int()
                 if offset < 0:
                     raise ValueError("OFFSET must be a positive integer")
-        if self.current_token is not None:
+        if self.current_token is not None and self.current_token.token_type is not TokenType.SEMICOLON:
             raise ValueError(f"Expected no more tokens, got {self.current_token}")
         return Select(
             columns=columns, table_name=table_name, where=where, limit=limit, order_by=order_by, offset=offset
@@ -188,7 +188,7 @@ class Parser:
         if self.current_token is None or not self.current_token.token_type == TokenType.RPAREN:
             raise ValueError(f"expected RPAREN token, was {self.current_token}")
         self.advance_token()
-        if self.current_token is not None:
+        if self.current_token is not None and self.current_token.token_type is not TokenType.SEMICOLON:
             raise ValueError(f"Expected no more tokens, got {self.current_token}")
         return Insert(values=values, table_name=table_name)
 
@@ -220,22 +220,24 @@ class Parser:
         table_name = str(token.literal)
         self.advance_token()
         columns = self.parse_create_table_columns()
-        if self.current_token is not None:
+        if self.current_token is not None and self.current_token.token_type is not TokenType.SEMICOLON:
             raise ValueError(f"Expected no more tokens, got {self.current_token}")
         return CreateTable(table_name=table_name, columns=columns)
 
-    def parse(self) -> Union[Select, Insert, CreateTable]:
+    def parse(self) -> Iterator[Union[Select, Insert, CreateTable]]:
         statement: Union[Select, Insert, CreateTable]
-        if self.current_token is None:
-            raise ValueError("No token")
-        if self.current_token.token_type == TokenType.SELECT:
-            self.advance_token()
-            return self.parse_select()
-        if self.current_token.token_type == TokenType.INSERT:
-            self.advance_token()
-            return self.parse_insert()
-        if self.current_token.token_type == TokenType.CREATE:
-            self.advance_token()
-            return self.parse_create_table()
-        else:
-            raise ValueError(f"Statement beginning with token type {self.current_token} not supported")
+        while self.current_token is not None:
+            if self.current_token.token_type == TokenType.SEMICOLON:
+                self.advance_token()
+                continue
+            if self.current_token.token_type == TokenType.SELECT:
+                self.advance_token()
+                yield self.parse_select()
+            elif self.current_token.token_type == TokenType.INSERT:
+                self.advance_token()
+                yield self.parse_insert()
+            elif self.current_token.token_type == TokenType.CREATE:
+                self.advance_token()
+                yield self.parse_create_table()
+            else:
+                raise ValueError(f"Statement beginning with token type {self.current_token} not supported")

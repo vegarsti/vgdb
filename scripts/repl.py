@@ -49,8 +49,6 @@ def repl() -> None:
     default = "\033[0m"
     prompt_with_color = f"{red}{prompt}{default}"
     while True:
-        tables = get_tables()
-        evaluator = Evaluator(tables=tables)
         try:
             user_input = input(prompt_with_color)
         except (KeyboardInterrupt, EOFError):
@@ -59,23 +57,29 @@ def repl() -> None:
             break
         lexer = Lexer(program=user_input)
         parser = Parser(lexer=lexer)
-        command: Optional[Union[CreateTable, Insert, Select]] = None
+        commands: List[Optional[Union[CreateTable, Insert, Select]]] = []
         try:
-            command = parser.parse()
+            commands = list(parser.parse())
         except ValueError as e:
             print(e)
             continue
-        if command is None:
+        if len(commands) == 0:
             print("no command given")
             continue
-        try:
-            result = evaluator.handle_command(command)
+        for command in commands:
+            if command is None:
+                continue
+            try:
+                tables = get_tables()
+                evaluator = Evaluator(tables=tables)
+                result = evaluator.handle_command(command)
+            except ValueError as e:
+                print(e)
+                continue
             if isinstance(result, str):
                 print(result)
             else:
                 print_selection(result)
-        except ValueError as e:
-            print(e)
 
 
 def main() -> None:

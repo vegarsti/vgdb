@@ -12,14 +12,14 @@ class Lexer:
     @property
     def next_character(self) -> str:
         if len(self.program) <= self.pos:
-            return ";"
+            return ""
         return self.program[self.pos]
 
     def read_char(self) -> None:
         self.current_character = self.next_character
         self.pos += 1
 
-    def read_identifier(self) -> Token:
+    def read_identifier(self) -> Optional[Token]:
         start_position = self.pos
         while self.next_character.isalpha() or self.next_character == "_":
             self.read_char()
@@ -32,7 +32,7 @@ class Lexer:
             token_type = keyword_token
         self.read_char()
         if len(identifier) == 0:
-            raise ValueError("got empty string")
+            return None
         return Token(token_type=token_type, literal=identifier)
 
     def read_string(self) -> Token:
@@ -66,6 +66,9 @@ class Lexer:
         return Token(token_type=token_type, literal=possible_operator)
 
     def next_token(self) -> Optional[Token]:
+        if self.current_character == ";":
+            self.read_char()
+            return Token(token_type=TokenType.SEMICOLON, literal=";")
         if self.current_character == ",":
             self.read_char()
             return Token(token_type=TokenType.COMMA, literal=",")
@@ -82,8 +85,6 @@ class Lexer:
         if self.next_character == " ":
             self.read_char()
             return self.next_token()
-        if self.next_character == ";":
-            return None
         if self.next_character == "'":
             self.read_char()
             return self.read_string()
@@ -102,5 +103,4 @@ class Lexer:
         if self.next_character == "*":
             self.read_char()
             return Token(token_type=TokenType.STAR, literal="*")
-        else:
-            return self.read_identifier()
+        return self.read_identifier()
