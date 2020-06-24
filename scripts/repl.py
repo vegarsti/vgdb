@@ -43,14 +43,19 @@ def print_selection(table: List[List[Union[int, str]]]) -> None:
         print(" ".join(row))
 
 
-def repl() -> None:
+def prompt_with_color() -> str:
     prompt = "vgdb> "
-    red = "\033[31m"
-    default = "\033[0m"
-    prompt_with_color = f"{red}{prompt}{default}"
+    start = "\033["
+    end = "m"
+    red = f"{start}31{end}"
+    reset_color = f"{start}0{end}"
+    return f"{red}{prompt}{reset_color}"
+
+
+def repl() -> None:
     while True:
         try:
-            user_input = input(prompt_with_color)
+            user_input = input(prompt_with_color())
         except (KeyboardInterrupt, EOFError):
             sys.exit(1)
         if user_input == "exit":
@@ -65,7 +70,6 @@ def repl() -> None:
             continue
         if len(commands) == 0:
             print("no command given")
-            continue
         for command in commands:
             if command is None:
                 continue
