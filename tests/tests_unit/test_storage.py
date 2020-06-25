@@ -1,6 +1,6 @@
 import pytest
 
-from vgdb.storage import Storage
+from vgdb.storage import InMemoryStorage, Storage
 
 
 @pytest.fixture
@@ -12,7 +12,7 @@ def storage():
     s.delete()
 
 
-class TestStorage:
+class TestPersistentStorage:
     def test_already_exists(self):
         pass
 
@@ -38,3 +38,13 @@ class TestStorage:
         row = [1, "hei"]
         storage.insert(row)
         assert list(storage.read_rows()) == [row]
+
+
+class TestInMemoryStorage:
+    def test_a(self):
+        storage = InMemoryStorage(name="a", columns=(("a", int), ("b", str)))
+        row = [1, "hei"]
+        storage.persist()
+        storage.insert(row)
+        rows = list(storage.read_rows())
+        assert rows == [row]
