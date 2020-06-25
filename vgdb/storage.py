@@ -56,11 +56,11 @@ class StorageInterface(ABC):
         ...
 
     @abstractmethod
-    def from_file(cls, table_name: str) -> "Storage":
+    def from_file(cls, table_name: str) -> "StorageInterface":
         ...
 
 
-class Storage(StorageInterface):
+class PersistentStorage(StorageInterface):
     """Storage layer for a table
 
     Table file schema:
@@ -103,7 +103,7 @@ class Storage(StorageInterface):
         self._file.unlink()
 
     @classmethod
-    def from_file(cls, table_name: str) -> "Storage":
+    def from_file(cls, table_name: str) -> "PersistentStorage":
         columns: List[Tuple[str, Type]] = []
         with open(f"{table_name}.{VGDB_FILE_SUFFIX}", "br+") as f:
             number_of_columns = read_tiny_int(f)
@@ -111,7 +111,7 @@ class Storage(StorageInterface):
                 column_name = read_null_terminated_string(f)
                 column_type = read_null_terminated_string(f)
                 columns.append((column_name, string_to_type[column_type]))
-        s = Storage(filename=table_name, columns=columns)
+        s = PersistentStorage(filename=table_name, columns=columns)
         return s
 
     def insert(self, row: Sequence[Union[int, str]]) -> None:
@@ -195,7 +195,7 @@ class InMemoryStorage(StorageInterface):
             f.write(string_to_null_terminated_byte_string(type_to_string[column_type]))
         self._length = self._header_bytes
 
-    def from_file(cls, table_name: str) -> "InMemoryStorage":  # type: ignore
+    def from_file(cls, table_name: str) -> "InMemoryStorage":
         columns: List[Tuple[str, Type]] = []
         with open(f"{table_name}.{VGDB_FILE_SUFFIX}", "br+") as f:
             number_of_columns = read_tiny_int(f)

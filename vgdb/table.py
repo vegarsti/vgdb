@@ -5,7 +5,7 @@ from operator import and_, eq, ge, gt, itemgetter, le, lt, ne, or_
 from typing import Callable, Dict, Iterable, Iterator, List, Optional, Sequence, Tuple, Type, Union
 
 from vgdb.statement import Conjunction, OrderBy, WhereStatement
-from vgdb.storage import InMemoryStorage, Storage
+from vgdb.storage import InMemoryStorage, PersistentStorage, StorageInterface
 from vgdb.type import type_to_string
 from vgdb.where import Predicate, Where
 
@@ -67,10 +67,11 @@ def reduce_booleans_using_conjunctions(
 class Table:
     def __init__(self, name: str, columns: Sequence[Tuple[str, Type]], storage_type: Optional[str] = None) -> None:
         self.name = name
+        self._file: StorageInterface
         if storage_type == "in-memory":
             self._file = InMemoryStorage(name=name, columns=columns)
         else:
-            self._file = Storage(filename=name, columns=columns)  # type: ignore
+            self._file = PersistentStorage(filename=name, columns=columns)
         self._columns: Dict[str, Type] = {name: typ for name, typ in columns}
         self._types = tuple(self._columns.values())
 
@@ -154,7 +155,7 @@ class Table:
 
     @classmethod
     def from_file(cls, name: str, storage_type: Optional[str] = None) -> "Table":
-        s = Storage.from_file(name)
+        s = PersistentStorage.from_file(name)
         rows = list(s.read_rows())
         columns = s._columns_as_they_came
         t = Table(name, columns, storage_type=storage_type)
