@@ -10,13 +10,14 @@ from vgdb.evaluator import Evaluator
 from vgdb.get_tables import get_tables
 from vgdb.lexer import Lexer
 from vgdb.parser import Parser
+from vgdb.table import Table
 
 
 def run_command(evaluator: Evaluator, sql_string: str) -> Union[str, List[List[Union[str, int]]]]:
     lexer = Lexer(program=sql_string)
     parser = Parser(lexer=lexer)
-    command = parser.parse()
-    return evaluator.handle_command(command)
+    commands = list(parser.parse())
+    return evaluator.handle_command(commands[0])
 
 
 def time_command(sql_string: str) -> None:
@@ -63,7 +64,22 @@ def run_insert_benchmark(table: str) -> None:
     evaluator = Evaluator(tables=get_tables())
     words = read_words()
     n = len(words)
-    insert_printout = f"Inserting {n} records..."
+    insert_printout = f"Inserting {n} records... (to disk)"
+    print(f"{insert_printout:<70}", end="")
+    sys.stdout.flush()
+    start = time.time()
+    insert_words(evaluator, table, words)
+    elapsed = time.time() - start
+    print(f"{elapsed:>10.5f} seconds")
+
+
+def run_in_memory_insert_benchmark(table: str) -> None:
+    table_object = Table(name=table, columns=[("number", int), ("words", str)], storage_type="in-memory")
+    table_object.persist()
+    evaluator = Evaluator(tables={table: table_object})
+    words = read_words()
+    n = len(words)
+    insert_printout = f"Inserting {n} records... (in memory)"
     print(f"{insert_printout:<70}", end="")
     sys.stdout.flush()
     start = time.time()
@@ -113,9 +129,8 @@ def sqlite_bench() -> None:
     db_name = "sqlite-bench.db"
     conn = sqlite3.connect(db_name)
     c = conn.cursor()
-    table_name = "benchmark"
+    table_name = "bench_select"
     run_insert_benchmark_sqlite(c, table_name)
-    print()
     run_select_benchmark_sqlite(c, table_name)
     delete_db(db_name)
 
@@ -128,6 +143,14 @@ def insert() -> None:
         print(e)
     finally:
         delete_db(f"{insert_db_name}.{VGDB_FILE_SUFFIX}")
+
+
+def insert_in_memory() -> None:
+    insert_db_name = "bench_insert"
+    try:
+        run_in_memory_insert_benchmark(insert_db_name)
+    except Exception as e:
+        print(e)
 
 
 def select() -> None:
@@ -145,11 +168,14 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     group = parser.add_mutually_exclusive_group()
     group.add_argument("--insert", action="store_true")
+    group.add_argument("--memory", action="store_true")
     group.add_argument("--select", action="store_true")
     group.add_argument("--sqlite", action="store_true")
     args = parser.parse_args()
     if args.insert:
         insert()
+    if args.memory:
+        insert_in_memory()
     elif args.select:
         select()
     elif args.sqlite:
@@ -159,7 +185,7 @@ def main() -> None:
         print("VGDB")
         print()
         insert()
-        print()
+        insert_in_memory()
         select()
         print()
         print("SQLITE")
