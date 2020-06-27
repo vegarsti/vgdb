@@ -41,7 +41,7 @@ class TestPersistentStorage:
 
 
 class TestInMemoryStorage:
-    def test_a(self):
+    def test_insert_read(self):
         storage = InMemoryStorage(name="a", columns=(("a", int), ("b", str)))
         row = [1, "hei"]
         storage.persist()

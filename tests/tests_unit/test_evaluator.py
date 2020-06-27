@@ -8,7 +8,7 @@ from vgdb.table import Table
 
 
 class TestEvaluator:
-    def test_a(self):
+    def test_eval_persistent(self):
         user_input = "select * from family"
         lexer = Lexer(program=user_input)
         parser = Parser(lexer=lexer)
@@ -21,7 +21,7 @@ class TestEvaluator:
         assert len(result) > 10
         assert result[0] == ["vegard", 26]
 
-    def test_in_memory(self):
+    def test_eval_in_memory(self):
         user_input = "select * from family"
         lexer = Lexer(program=user_input)
         parser = Parser(lexer=lexer)
