@@ -1,3 +1,5 @@
+import io
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import IO, Dict, Iterator, List, Sequence, Tuple, Type, Union
 
@@ -40,7 +42,34 @@ def read_int(f: IO[bytes]) -> int:
     return int.from_bytes(f.read(INT_BYTE_SIZE), byteorder=ENDIANNESS)
 
 
-class Storage:
+class StorageInterface(ABC):
+    _columns: Dict[str, Type]
+
+    @abstractmethod
+    def insert(self, row: Sequence[Union[int, str]]) -> None:
+        ...
+
+    @abstractmethod
+    def read_rows(self) -> Iterator[List[Union[int, str]]]:
+        ...
+
+    @abstractmethod
+    def persist(self) -> None:
+        ...
+
+    @abstractmethod
+    def from_file(cls, table_name: str) -> "StorageInterface":
+        ...
+
+    def _infer_header_bytes(self) -> int:
+        s = NUMBER_OF_COLUMNS_INT_LENGTH
+        for column_name, column_type in self._columns.items():
+            s += len(column_name.encode("ascii")) + 1
+            s += len(type_to_string[column_type].encode("ascii")) + 1
+        return s
+
+
+class PersistentStorage(StorageInterface):
     """Storage layer for a table
 
     Table file schema:
@@ -55,14 +84,7 @@ class Storage:
         self._spec = tuple(type_ for name, type_ in columns)
         self._columns_as_they_came = columns
         self._columns: Dict[str, Type] = {name: type_ for name, type_ in columns}
-        self._header_bytes = self.infer_header_bytes()
-
-    def infer_header_bytes(self) -> int:
-        s = NUMBER_OF_COLUMNS_INT_LENGTH
-        for column_name, column_type in self._columns.items():
-            s += len(column_name.encode("ascii")) + 1
-            s += len(type_to_string[column_type].encode("ascii")) + 1
-        return s
+        self._header_bytes = self._infer_header_bytes()
 
     def persist(self) -> None:
         self._error_if_exists()
@@ -83,7 +105,7 @@ class Storage:
         self._file.unlink()
 
     @classmethod
-    def from_file(cls, table_name: str) -> "Storage":
+    def from_file(cls, table_name: str) -> "PersistentStorage":
         columns: List[Tuple[str, Type]] = []
         with open(f"{table_name}.{VGDB_FILE_SUFFIX}", "br+") as f:
             number_of_columns = read_tiny_int(f)
@@ -91,7 +113,7 @@ class Storage:
                 column_name = read_null_terminated_string(f)
                 column_type = read_null_terminated_string(f)
                 columns.append((column_name, string_to_type[column_type]))
-        s = Storage(filename=table_name, columns=columns)
+        s = PersistentStorage(filename=table_name, columns=columns)
         return s
 
     def insert(self, row: Sequence[Union[int, str]]) -> None:
@@ -122,3 +144,66 @@ class Storage:
                     else:
                         raise ValueError("unsupported type")
                 yield row
+
+
+class InMemoryStorage(StorageInterface):
+    def __init__(self, name: str, columns: Sequence[Tuple[str, Type]]) -> None:
+        self._name = name
+        self._spec = tuple(type_ for name, type_ in columns)
+        self._columns_as_they_came = columns
+        self._columns: Dict[str, Type] = {name: type_ for name, type_ in columns}
+        self._header_bytes = self._infer_header_bytes()
+        self.file = io.BytesIO()
+        self._length = 0
+
+    def insert(self, row: Sequence[Union[int, str]]) -> None:
+        f = self.file
+        f.seek(self._length)
+        values: List[bytes] = []
+        for cell, typ in zip(row, self._columns.values()):
+            if typ == str:
+                values.append(string_to_null_terminated_byte_string(str(cell)))
+            elif typ == int:
+                values.append(int(cell).to_bytes(INT_BYTE_SIZE, byteorder=ENDIANNESS))
+            else:
+                raise ValueError(f"{cell} is of unsupported type {typ}")
+        for v in values:
+            f.write(v)
+        self._length = f.tell()
+
+    def read_rows(self) -> Iterator[List[Union[int, str]]]:
+        f = self.file
+        f.seek(0)
+        f.read(self._header_bytes)
+        while f.tell() < self._length:
+            row: List[Union[int, str]] = []
+            for typ in self._columns.values():
+                if typ == str:
+                    s = read_null_terminated_string(f)
+                    row.append(s)
+                elif typ == int:
+                    i = read_int(f)
+                    row.append(i)
+                else:
+                    raise ValueError("unsupported type")
+            yield row
+
+    def persist(self) -> None:
+        f = self.file
+        f.seek(0)
+        write_tiny_int(f, len(self._spec))
+        for column_name, column_type in self._columns.items():
+            f.write(string_to_null_terminated_byte_string(column_name))
+            f.write(string_to_null_terminated_byte_string(type_to_string[column_type]))
+        self._length = self._header_bytes
+
+    def from_file(cls, table_name: str) -> "InMemoryStorage":
+        columns: List[Tuple[str, Type]] = []
+        with open(f"{table_name}.{VGDB_FILE_SUFFIX}", "br+") as f:
+            number_of_columns = read_tiny_int(f)
+            for _ in range(number_of_columns):
+                column_name = read_null_terminated_string(f)
+                column_type = read_null_terminated_string(f)
+                columns.append((column_name, string_to_type[column_type]))
+        s = InMemoryStorage(name=table_name, columns=columns)
+        return s
