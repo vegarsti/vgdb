@@ -2,7 +2,7 @@ import re
 from functools import partial
 from itertools import islice
 from operator import and_, eq, ge, gt, itemgetter, le, lt, ne, or_
-from typing import Callable, Dict, Iterable, Iterator, List, Optional, Sequence, Tuple, Type, Union
+from typing import Callable, Dict, Iterable, Iterator, List, Literal, Optional, Sequence, Tuple, Type, Union
 
 from vgdb.statement import Conjunction, OrderBy, WhereStatement
 from vgdb.storage import InMemoryStorage, PersistentStorage, StorageInterface
@@ -65,12 +65,17 @@ def reduce_booleans_using_conjunctions(
 
 
 class Table:
-    def __init__(self, name: str, columns: Sequence[Tuple[str, Type]], storage_type: Optional[str] = None) -> None:
+    def __init__(
+        self,
+        name: str,
+        columns: Sequence[Tuple[str, Type]],
+        storage_type: Literal["in-memory", "persistent"] = "persistent",
+    ) -> None:
         self.name = name
         self._file: StorageInterface
         if storage_type == "in-memory":
             self._file = InMemoryStorage(name=name, columns=columns)
-        else:
+        elif storage_type == "persistent":
             self._file = PersistentStorage(filename=name, columns=columns)
         self._columns: Dict[str, Type] = {name: typ for name, typ in columns}
         self._types = tuple(self._columns.values())
@@ -154,7 +159,7 @@ class Table:
         self._file.insert(row)
 
     @classmethod
-    def from_file(cls, name: str, storage_type: Optional[str] = None) -> "Table":
+    def from_file(cls, name: str, storage_type: Literal["in-memory", "persistent"] = "persistent") -> "Table":
         s = PersistentStorage.from_file(name)
         rows = list(s.read_rows())
         columns = s._columns_as_they_came
