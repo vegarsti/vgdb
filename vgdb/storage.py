@@ -43,6 +43,8 @@ def read_int(f: IO[bytes]) -> int:
 
 
 class StorageInterface(ABC):
+    _columns: Dict[str, Type]
+
     @abstractmethod
     def insert(self, row: Sequence[Union[int, str]]) -> None:
         ...
@@ -58,6 +60,13 @@ class StorageInterface(ABC):
     @abstractmethod
     def from_file(cls, table_name: str) -> "StorageInterface":
         ...
+
+    def _infer_header_bytes(self) -> int:
+        s = NUMBER_OF_COLUMNS_INT_LENGTH
+        for column_name, column_type in self._columns.items():
+            s += len(column_name.encode("ascii")) + 1
+            s += len(type_to_string[column_type].encode("ascii")) + 1
+        return s
 
 
 class PersistentStorage(StorageInterface):
@@ -76,13 +85,6 @@ class PersistentStorage(StorageInterface):
         self._columns_as_they_came = columns
         self._columns: Dict[str, Type] = {name: type_ for name, type_ in columns}
         self._header_bytes = self._infer_header_bytes()
-
-    def _infer_header_bytes(self) -> int:
-        s = NUMBER_OF_COLUMNS_INT_LENGTH
-        for column_name, column_type in self._columns.items():
-            s += len(column_name.encode("ascii")) + 1
-            s += len(type_to_string[column_type].encode("ascii")) + 1
-        return s
 
     def persist(self) -> None:
         self._error_if_exists()
@@ -204,11 +206,4 @@ class InMemoryStorage(StorageInterface):
                 column_type = read_null_terminated_string(f)
                 columns.append((column_name, string_to_type[column_type]))
         s = InMemoryStorage(name=table_name, columns=columns)
-        return s
-
-    def _infer_header_bytes(self) -> int:
-        s = NUMBER_OF_COLUMNS_INT_LENGTH
-        for column_name, column_type in self._columns.items():
-            s += len(column_name.encode("ascii")) + 1
-            s += len(type_to_string[column_type].encode("ascii")) + 1
         return s
